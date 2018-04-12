@@ -1,10 +1,17 @@
 import discord
 import images
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 from discord.ext.commands import Bot
+
+import model
 
 TOKEN = 'MzM5Mzg5NTE4NjQzNzI0Mjkx.Da_IbQ.ZzBwGKSehVd8TrCIsoqGFf45xBQ'
 
 client = Bot(command_prefix=("!"))
+engine = create_engine('sqlite:///account.db')
+session = Session(engine)
+model.Base.metadata.create_all(engine)
 
 
 # @client.command()
@@ -36,14 +43,11 @@ async def on_message(message):
             await client.send_message(message.channel, 'No given name.')
             return
         try:
-            saved = images.save_image(message.attachments[0]['url'], name, message.author.name)
+            saved = images.save_image(session, message.attachments[0]['url'], name, message.author.name)
         except IndexError as e:
             await client.send_message(message.channel, 'No given image.')
             return
-        if saved['ok']:
-            await client.send_message(message.channel, 'Image saved as "' + name + '".')
-        else:
-            await client.send_message(message.channel, saved['msg'])
+        await client.send_message(message.channel, saved['msg'])
 
     if message.content.startswith('!image'):
         try:
@@ -51,11 +55,23 @@ async def on_message(message):
         except IndexError as e:
             await client.send_message(message.channel, 'No given name.')
             return
-        resp = images.get_image(name)
+        resp = images.get_image(session, name)
         if resp['ok']:
-            await client.send_file(message.channel, resp['msg'])
+            em = discord.Embed()
+            em.set_image(url=resp['msg'])
+            await client.send_message(message.channel, embed=em)
         else:
             await client.send_message(message.channel, resp['msg'])
+
+    if message.content.startswith('!delete_image'):
+        try:
+            await client.send_message(message.channel, images.delete_image(session, message.content.split()[1])['msg'])
+        except IndexError as e:
+            await client.send_message(message.channel, 'No given name.')
+            return
+
+    if message.content.startswith('!list_images'):
+        await client.send_message(message.channel, images.get_list(session))
 
     if message.content.startswith('!quote'):
         try:
@@ -63,14 +79,19 @@ async def on_message(message):
         except IndexError as e:
             await client.send_message(message.channel, 'No given message id.')
             return
+
         try:
-            message = await client.get_message(message.content.split()[2], message_id)
+            channel = discord.utils.find(lambda c: c.name == message.content.split()[2], message.server.channels)
+            if channel is not None:
+                quoted_message = await client.get_message(channel, message_id)
+            else:
+                await client.send_message(message.channel, 'Channel "' + channel + '" does not exist.')
         except IndexError as e:
-            message = await client.get_message(message.channel, message_id)
-        message = await client.get_message(message.channel, message_id)
-        em = discord.Embed(description=message.clean_content, colour=0xDEADBF)
-        em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-        await client.send_message(message.channel, embed=em)
+            quoted_message = await client.get_message(message.channel, message_id)
+
+        em = discord.Embed(description=quoted_message.clean_content, colour=quoted_message.author.roles[-1].color)
+        em.set_author(name=quoted_message.author.name, icon_url=quoted_message.author.avatar_url)
+        await client.send_message(message.channel, quoted_message.author.mention, embed=em)
 
 
 
