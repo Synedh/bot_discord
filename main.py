@@ -19,7 +19,7 @@ client = Bot(command_prefix=("!"))
 
 @client.event
 async def on_message(message):
-    print(message.channel.name + ' - ' + message.author.name + ' - ' + message.content)
+    # print(message.channel.name + ' - ' + message.author.name + ' - ' + message.content)
 
     # we do not want the bot to reply to itself
     if message.author == client.user:
@@ -36,14 +36,14 @@ async def on_message(message):
             await client.send_message(message.channel, 'No given name.')
             return
         try:
-            saved = images.save_image(message.attachments[0]['url'], name)
+            saved = images.save_image(message.attachments[0]['url'], name, message.author.name)
         except IndexError as e:
             await client.send_message(message.channel, 'No given image.')
             return
-        if saved:
+        if saved['ok']:
             await client.send_message(message.channel, 'Image saved as "' + name + '".')
         else:
-            await client.send_message(message.channel, 'Unknown error.')
+            await client.send_message(message.channel, saved['msg'])
 
     if message.content.startswith('!image'):
         try:
@@ -51,8 +51,11 @@ async def on_message(message):
         except IndexError as e:
             await client.send_message(message.channel, 'No given name.')
             return
-        image = images.get_image(name)
-        await client.send_file(message.channel, image)
+        resp = images.get_image(name)
+        if resp['ok']:
+            await client.send_file(message.channel, resp['msg'])
+        else:
+            await client.send_message(message.channel, resp['msg'])
 
     if message.content.startswith('!quote'):
         try:
