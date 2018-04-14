@@ -6,7 +6,7 @@ from discord.ext.commands import Bot
 
 import model
 
-TOKEN = 'MzM5Mzg5NTE4NjQzNzI0Mjkx.Da_IbQ.ZzBwGKSehVd8TrCIsoqGFf45xBQ'
+TOKEN = '<TOKEN_ID>'
 
 client = Bot(command_prefix=("!"))
 engine = create_engine('sqlite:///account.db')
