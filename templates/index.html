@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Visu images</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    </head>
+    <body>
+        <h1>Visu discord ThiS is ThE EnD</h1>
+        <div class="search">
+            <input id="search" type="text" placeholder="Rechercher">
+        </div>
+        <div class="content-wrapper">
+        {% for image in images %}
+        <div class="item-wrapper" onmouseover="hovering('{{ image.url }}')" onmouseout="outhovering()">
+                <div class="filter name">{{ image.name }}</div>
+                <div class="filter sender">{{ image.sender }}</div>
+                <div class="filter used">{{ image.used }}</div>
+                <div class="link" onclick="toClipboard('{{ image.name }}')">Copy to clipboard</div>
+            </div>
+        {% endfor %}
+            <div class="hovering_image"></div>
+        </div>
+        <input type="text" value="!image " id="command">
+        <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+    </body>
+</html>

@@ -6,8 +6,6 @@ from discord.ext.commands import Bot
 
 import model
 
-TOKEN = 'MzM5Mzg5NTE4NjQzNzI0Mjkx.Da_IbQ.ZzBwGKSehVd8TrCIsoqGFf45xBQ'
-
 client = Bot(command_prefix=("!"))
 engine = create_engine('sqlite:///account.db')
 session = Session(engine)
@@ -71,7 +69,10 @@ async def on_message(message):
             return
 
     if message.content.startswith('!list_images'):
-        await client.send_message(message.channel, images.get_list(session))
+        msgs = images.get_list(session)
+        for msg in msgs:
+            await client.send_message(message.author, '```' + msg + '```')
+        await client.send_message(message.channel, 'Sent list in private message.')
 
     if message.content.startswith('!quote'):
         try:

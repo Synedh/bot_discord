@@ -12,6 +12,7 @@ class Image(Base):
     date = Column(DateTime)
     sender = Column(String)
     url = Column(String)
+    used = Column(Integer)
 
     def __repr__(self):
         return "<Image (name='%s', date='%s', sender='%s')>" % (self.name, str(self.date), self.sender)

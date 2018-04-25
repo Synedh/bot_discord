@@ -1,0 +1,115 @@
+body {
+    font-family: Sans-Serif;
+    background-color: #36393e;
+    color: #bcbbae;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h1 {
+    font-variant: small-caps;
+    text-align: center;
+}
+
+.search {
+    text-align: center;
+}
+
+.search input {
+    border: 0;
+    outline: 0;
+    color: #bcbbae;
+    padding-left: 5px;
+    padding-right: 5px;
+    background: transparent;
+    border-bottom: 1px solid #7f8186;
+    font-size: 24px;
+    width: 50%;
+
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: #7f8186;
+    opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: #7f8186;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+    color: #7f8186;
+}
+
+input:focus::-webkit-input-placeholder { color:transparent; }
+input:focus:-moz-placeholder { color:transparent; } /* FF 4-18 */
+input:focus::-moz-placeholder { color:transparent; } /* FF 19+ */
+input:focus:-ms-input-placeholder { color:transparent; } /* IE 10+ */
+
+.content-wrapper {
+    margin-top: 50px;
+    background-color: #484c52;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.item-wrapper {
+    width: 150px;
+    background: #36393e;
+    padding: 20px;
+    margin: 10px;
+    position: relative;
+    border-radius: 5px;
+}
+
+.name {
+    text-align: center;
+    font-size: 18px;
+}
+
+.sender {
+    color: #999;
+    padding-top: 10px;
+}
+
+.used {
+    position: absolute;
+    top: 50px;
+    right: 20px;
+    color: #999;
+}
+
+#command {
+    display: none;
+}
+
+.link {
+    text-align: center;
+    margin-top: 10px;
+    background-color: #484c52;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    border-radius: 15px;
+    cursor: pointer;
+}
+/*
+.item-wrapper:hover~.hovering_image{
+    display: block;
+}
+*/
+.hovering_image {
+    position: absolute;
+    display: none;
+    width: 190px;
+    height: 400px;
+    background-image: url('https://cdn.discordapp.com/attachments/433665712247144463/434025589008105472/tom_calling.png');
+    background-repeat: no-repeat;
+    background-size: 190px;
+    left: 0;
+    top: 0;
+}
+
