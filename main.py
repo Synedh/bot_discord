@@ -6,6 +6,8 @@ from discord.ext.commands import Bot
 
 import model
 
+TOKEN = '<TOKEN_ID>'
+
 client = Bot(command_prefix=("!"))
 engine = create_engine('sqlite:///account.db')
 session = Session(engine)
