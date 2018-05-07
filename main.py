@@ -1,126 +1,116 @@
-import discord
-import images
 import random
+import discord
+from discord.ext.commands import Bot
+from discord.errors import HTTPException, NotFound
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from discord.ext.commands import Bot
-from discord.errors import HTTPException
 
+import images
 import model
 
-TOKEN = None
+token = None
 with open('token') as file:
-    TOKEN = file.readline()[:-1]
+    token = file.readline()[:-1]
 
-client = Bot(command_prefix=("!"))
+bot = Bot(command_prefix=("!"))
 engine = create_engine('sqlite:///account.db')
 session = Session(engine)
 model.Base.metadata.create_all(engine)
 
 
-# @client.command()
-# async def quote(id, channel=None):
-#     if not channel:
-#         message = await client.get_message(message.channel, message_id)
-#         em = discord.Embed(description=message.clean_content, colour=0xDEADBF)
-#         em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-#         await client.say(message.channel, embed=em)
+@bot.command(pass_context=True)
+async def hello(ctx):
+    bot.say('Hello {0.author.mention}'.format(ctx.message))
 
 
-
-@client.event
-async def on_message(message):
-    # print(message.channel.name + ' - ' + message.author.name + ' - ' + message.content)
-
-    # we do not want the bot to reply to itself
-    if message.author == client.user:
-        return
-
-    if message.content.startswith('!hello'):
-        msg = 'Hello {0.author.mention}'.format(message)
-        await client.send_message(message.channel, msg)
-
-    if message.content.startswith('!save_image'):
+@bot.command(pass_context=True)
+async def save_image(ctx, img_name=None):
+    if img_name == None:
+        await bot.say('No given name.')
+    else:
         try:
-            name = message.content.split()[1]
+            saved = images.save_image(session, ctx.message.attachments[0]['url'], img_name, ctx.message.author.display_name)
+            await bot.say(saved['msg'])
         except IndexError as e:
-            await client.send_message(message.channel, 'No given name.')
-            return
-        try:
-            saved = images.save_image(session, message.attachments[0]['url'], name, message.author.name)
-        except IndexError as e:
-            await client.send_message(message.channel, 'No given image.')
-            return
-        await client.send_message(message.channel, saved['msg'])
+            await bot.say('No given image.')
 
-    if message.content.startswith('!image'):
-        try:
-            name = message.content.split()[1]
-        except IndexError as e:
-            await client.send_message(message.channel, 'No given name.')
-            return
-        resp = images.get_image(session, name)
+
+@bot.command(pass_context=True)
+async def image(ctx, img_name=None):
+    if img_name == None:
+        await bot.say('No given name.')
+    else:
+        resp = images.get_image(session, img_name)
         if resp['ok']:
             em = discord.Embed()
             em.set_image(url=resp['msg'])
-            await client.send_message(message.channel, embed=em)
+            await bot.send_message(ctx.message.channel, embed=em)
         else:
-            await client.send_message(message.channel, resp['msg'])
+            await bot.say(resp['msg'])
 
-    if message.content.startswith('!delete_image'):
-        try:
-            await client.send_message(message.channel, images.delete_image(session, message.content.split()[1])['msg'])
-        except IndexError as e:
-            await client.send_message(message.channel, 'No given name.')
+
+@bot.command()
+async def delete_image(img_name=None):
+    if img_name == None:
+        await bot.say('No given name.')
+    else:
+        await bot.say(images.delete_image(session, img_name)['msg'])
+
+
+@bot.command(pass_context=True)
+async def list_images(ctx):
+    pass
+    # msgs = images.get_list(session)
+    # for msg in msgs:
+    #     await bot.send_message(ctx.message.author, '```' + msg + '```')
+    # await bot.say('Sent list in private message.')
+
+
+@bot.command(pass_context=True)
+async def quote(ctx, msg_id=None, channel=None):
+    if not msg_id:
+        await bot.say('No given message id.')
+    elif channel:
+        quote_channel = discord.utils.find(lambda c: c.name == channel, ctx.message.server.channels)
+        if not quote_channel:
+            await bot.say('Channel `' + channel + '` does not exists.')
             return
-
-    if message.content.startswith('!list_images'):
-        msgs = images.get_list(session)
-        for msg in msgs:
-            await client.send_message(message.author, '```' + msg + '```')
-        await client.send_message(message.channel, 'Sent list in private message.')
-
-    if message.content.startswith('!quote'):
-        try:
-            message_id = message.content.split()[1]
-        except IndexError as e:
-            await client.send_message(message.channel, 'No given message id.')
-            return
-
-        try:
-            channel = discord.utils.find(lambda c: c.name == message.content.split()[2], message.server.channels)
-            if channel is not None:
-                quoted_message = await client.get_message(channel, message_id)
-            else:
-                await client.send_message(message.channel, 'Channel "' + channel + '" does not exist.')
-        except IndexError as e:
-            quoted_message = await client.get_message(message.channel, message_id)
-
-        em = discord.Embed(description=quoted_message.clean_content, colour=quoted_message.author.roles[-1].color)
-        em.set_author(name=quoted_message.author.name, icon_url=quoted_message.author.avatar_url)
-        await client.send_message(message.channel, quoted_message.author.mention, embed=em)
-        
-    if message.content.startswith('!roll'):
-        args = message.content.split()[1:]
-        try:
-            if len(args) == 0 or int(args[0]) == 0:
-                await client.send_message(message.channel, 'Nothing to roll !')
-            elif len(args) == 1:
-                await client.send_message(message.channel, 'Rolled ' + str(random.randint(1, int(args[0]))) + '.')
-            elif len(args) == 2 and int(args[0]) < 2000:
-                values = [random.randint(1, int(args[1])) for i in range(0, int(args[0]))]
-                await client.send_message(message.channel, 'Rolled ' + ', '.join([str(value) for value in values]) + '.\nTotal value : ' + str(sum(values)) + '.')
-            else:
-                await client.send_message(message.channel, 'Too many dices to roll !')
-        except ValueError as e:
-            await client.send_message(message.channel, 'Invalid dice values.')
-        except HTTPException as e:
-            await client.send_message(message.channel, 'Too many dices to roll !')
+    else:
+        quote_channel = ctx.message.channel
+    try:
+        msg = await bot.get_message(quote_channel, msg_id)
+    except (HTTPException, NotFound):
+        await bot.say('Message with id `' + msg_id + '` does not exists.')
+        return
+    em = discord.Embed(description=msg.clean_content, colour=msg.author.roles[-1].color)
+    em.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
+    await bot.say(ctx.message.channel, embed=em)
 
 
-@client.event
+@bot.command()
+async def roll(arg1=None, arg2=None):
+    try:
+        if arg1 == None:
+            await bot.say('Nothing to roll !')
+        elif arg2 == None:
+            await bot.say('Rolled ' + str(random.randint(1, int(arg1))) + '.')
+        elif int(arg1) < 2000:
+            values = [random.randint(1, int(arg2)) for i in range(0, int(arg1))]
+            await bot.say('Rolled ' + ', '.join([str(value) for value in values]) + '.\nTotal value : ' + str(sum(values)) + '.')
+        else:
+            await bot.say('Too many dices to roll !')
+    except ValueError as e:
+        await bot.say('Invalid dice values.')
+    except HTTPException as e:
+        await bot.say('Too many dices to roll !')
+
+
+# @bot.event
+# async def on_message(message):
+
+@bot.event
 async def on_ready():
-    print('Logged in as ' + client.user.name + ' with id : ' + str(client.user.id))
+    print('Logged in as ' + bot.user.name + ' with id : ' + str(bot.user.id))
     print('------')
 
-client.run(TOKEN)
+bot.run(token)

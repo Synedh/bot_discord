@@ -1,2 +1,5 @@
 token
-__pycache__
+pip-selfcheck.json
+__pycache__/
+bin/
+lib/
