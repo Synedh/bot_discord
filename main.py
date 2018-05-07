@@ -1,12 +1,16 @@
 import discord
 import images
+import random
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from discord.ext.commands import Bot
+from discord.errors import HTTPException
 
 import model
 
-TOKEN = '<TOKEN_ID>'
+TOKEN = None
+with open('token') as file:
+    TOKEN = file.readline()[:-1]
 
 client = Bot(command_prefix=("!"))
 engine = create_engine('sqlite:///account.db')
@@ -95,7 +99,23 @@ async def on_message(message):
         em = discord.Embed(description=quoted_message.clean_content, colour=quoted_message.author.roles[-1].color)
         em.set_author(name=quoted_message.author.name, icon_url=quoted_message.author.avatar_url)
         await client.send_message(message.channel, quoted_message.author.mention, embed=em)
-
+        
+    if message.content.startswith('!roll'):
+        args = message.content.split()[1:]
+        try:
+            if len(args) == 0 or int(args[0]) == 0:
+                await client.send_message(message.channel, 'Nothing to roll !')
+            elif len(args) == 1:
+                await client.send_message(message.channel, 'Rolled ' + str(random.randint(1, int(args[0]))) + '.')
+            elif len(args) == 2 and int(args[0]) < 2000:
+                values = [random.randint(1, int(args[1])) for i in range(0, int(args[0]))]
+                await client.send_message(message.channel, 'Rolled ' + ', '.join([str(value) for value in values]) + '.\nTotal value : ' + str(sum(values)) + '.')
+            else:
+                await client.send_message(message.channel, 'Too many dices to roll !')
+        except ValueError as e:
+            await client.send_message(message.channel, 'Invalid dice values.')
+        except HTTPException as e:
+            await client.send_message(message.channel, 'Too many dices to roll !')
 
 
 @client.event

@@ -16,7 +16,7 @@ def save_image(session, url, name, username):
     elif response.ok and 'image' not in response.headers['content-type']:
         return {'ok': False, 'msg': 'That\'s not an image !'}
     delete_image(session, name)
-    session.add(model.Image(name=name, date=datetime.now(), sender=username, url=url))
+    session.add(model.Image(name=name, date=datetime.now(), sender=username, url=url, used=0))
     session.commit()
     return {'ok': True, 'msg': 'Image saved as "' + name + '".'}
 

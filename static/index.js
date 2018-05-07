@@ -30,6 +30,6 @@ function toClipboard(name) {
     $("#command").css({'display': 'block'});
     copyText.select();
     status = document.execCommand("copy");
-    copyText.value = "!image";
+    copyText.value = "!image ";
     $("#command").css({'display': 'none'});
 }
