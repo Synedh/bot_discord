@@ -1,10 +1,54 @@
 body {
-    font-family: Sans-Serif;
+    font-family: Whitney, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;
+    position: relative;
     background-color: #36393e;
     color: #bcbbae;
     max-width: 80%;
     margin-left: auto;
     margin-right: auto;
+}
+
+.account {
+    background-color: #484c52;
+    border-radius: 3px;
+    padding: 2px;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    top: 0;
+    right: 0;
+    text-align: right;
+}
+
+.account .in {
+    display: none;
+}
+
+.account #profil {
+    vertical-align: middle;
+    padding-left: 8px;
+}
+
+.account #avatar {
+    padding: 0 5px;
+    max-height: 30px;
+    border-radius: 1000px;
+}
+
+.button {
+    background-color: #7289DA;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 8px 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #FFF;
+}
+
+.account .logout {
+    font-size: 30px;
+    padding: 0px 8px;
 }
 
 h1 {
@@ -60,7 +104,7 @@ input:focus:-ms-input-placeholder { color:transparent; } /* IE 10+ */
 .item-wrapper {
     width: 150px;
     background: #36393e;
-    padding: 20px;
+    padding: 30px 20px 20px 20px;
     margin: 10px;
     position: relative;
     border-radius: 5px;
@@ -77,15 +121,40 @@ input:focus:-ms-input-placeholder { color:transparent; } /* IE 10+ */
 }
 
 .used {
-    background-image: url('eye-icon.png');
     position: absolute;
-    top: 50px;
+    top: 60px;
     right: 20px;
     color: #999;
 }
 
+.icon {
+    position: absolute;
+    max-height: 25px;
+    top: 10px;
+    filter: brightness(80%) contrast(0%);
+}
+
+.icon.delete {
+    cursor: pointer;
+    right: 15px;
+}
+
 #command {
     display: none;
+}
+
+.image_link {
+    text-align: center;
+    margin-top: 10px;
+    background-color: #484c52;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    border-radius: 15px;
+}
+
+.image_link a {
+    text-decoration: none;
+    color: #bcbbae;
 }
 
 .link {

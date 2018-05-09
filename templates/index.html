@@ -1,18 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
         <title>Visu images</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='img/dofus-493837e.png') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     </head>
     <body>
+        <div class="account">
+            <span class="button out" onclick="login()">Connection</span>
+            <span class="in" id="profil"></span>
+            <img id="avatar" class="in">
+            <span class="button in logout" onclick="logout()">&#8677;</span>
+        </div>
         <h1>Visu discord ThiS is ThE EnD</h1>
         <div class="search">
             <input id="search" type="text" placeholder="Rechercher">
         </div>
         <div class="content-wrapper">
         {% for image in images %}
-        <div class="item-wrapper" onmouseover="hovering('{{ image.url }}')" onmouseout="outhovering()">
+            <div class="item-wrapper" onmouseover="hovering('{{ image.url }}')" onmouseout="outhovering()">
+                <a target="_blank" href="{{ image.url }}"><img src="{{ url_for('static', filename='img/eye-icon.png') }}" class="icon see"></a>
+                <img src="{{ url_for('static', filename='img/delete-icon.png') }}" class="icon delete">
                 <div class="filter name">{{ image.name }}</div>
                 <div class="filter sender">{{ image.sender }}</div>
                 <div class="filter used">{{ image.used }}</div>
@@ -22,7 +31,8 @@
             <div class="hovering_image"></div>
         </div>
         <input type="text" value="!image " id="command">
-        <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
-        <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/lwd.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     </body>
 </html>
