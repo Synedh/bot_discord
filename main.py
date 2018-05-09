@@ -119,7 +119,7 @@ async def roll(arg1=None, arg2=None):
 @bot.command()
 async def pick(*choices: str):
     if len(choices) > 0:
-        await bot.say('Picked ', random.choice(choices), '.')
+        await bot.say('Picked ' + random.choice(choices) + '.')
     else:
         await bot.say('No value to pick !')
 
