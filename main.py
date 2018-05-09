@@ -17,10 +17,21 @@ engine = create_engine('sqlite:///account.db')
 session = Session(engine)
 model.Base.metadata.create_all(engine)
 
+command_list = [
+    'hello',
+    'save_image',
+    'image',
+    'delete_image',
+    'list_images',
+    'quote',
+    'roll',
+    'pick'
+]
+
 
 @bot.command(pass_context=True)
 async def hello(ctx):
-    bot.say('Hello {0.author.mention}'.format(ctx.message))
+    bot.say('Hello ' + ctx.message.author.mention + ' !')
 
 
 @bot.command(pass_context=True)
@@ -59,7 +70,7 @@ async def delete_image(img_name=None):
 
 @bot.command(pass_context=True)
 async def list_images(ctx):
-    pass
+    await bot.say('Deprecated command, go to https://c.ddns.net instead.')
     # msgs = images.get_list(session)
     # for msg in msgs:
     #     await bot.send_message(ctx.message.author, '```' + msg + '```')
@@ -84,7 +95,7 @@ async def quote(ctx, msg_id=None, channel=None):
         return
     em = discord.Embed(description=msg.clean_content, colour=msg.author.roles[-1].color)
     em.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
-    await bot.say(ctx.message.channel, embed=em)
+    await bot.say(msg.author.mention, embed=em)
 
 
 @bot.command()
@@ -105,8 +116,19 @@ async def roll(arg1=None, arg2=None):
         await bot.say('Too many dices to roll !')
 
 
-# @bot.event
-# async def on_message(message):
+@bot.command()
+async def pick(*choices: str):
+    if len(choices) > 0:
+        await bot.say('Picked ', random.choice(choices), '.')
+    else:
+        await bot.say('No value to pick !')
+
+
+@bot.event
+async def on_message(message):
+    print('{0} - {1} - {2} - {3}'.format(message.server, message.channel, message.author, message.content))
+    if len(message.content) > 0 and message.content.split()[0][1:] in command_list:
+        await bot.process_commands(message)
 
 @bot.event
 async def on_ready():
