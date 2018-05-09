@@ -3,3 +3,4 @@ pip-selfcheck.json
 __pycache__/
 bin/
 lib/
+account.db
