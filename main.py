@@ -126,7 +126,7 @@ async def pick(*choices: str):
 
 @bot.event
 async def on_message(message):
-    print('{0} - {1} - {2} - {3}'.format(message.server, message.channel, message.author, message.content))
+    # print('{0} - {1} - {2} - {3}'.format(message.server, message.channel, message.author, message.content))
     if len(message.content) > 0 and message.content.split()[0][1:] in command_list:
         await bot.process_commands(message)
 
