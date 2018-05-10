@@ -5,16 +5,14 @@ from flask import Flask, render_template
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-engine = create_engine('sqlite:///account.db')
-session = Session(engine)
-model.Base.metadata.create_all(engine)
-
 app = Flask(__name__)
 app.debug = True
 app.secret_key = 'qwertyuiop'
 
 
 def get_images():
+    engine = create_engine('sqlite:///account.db')
+    session = Session(engine)
     return [image for image in session.query(model.Image).filter(model.Image.active)]
 
 

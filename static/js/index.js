@@ -4,13 +4,24 @@ let discord = new LoginWithDiscord({
     cache: true
 })
 
+// Get the logout button
+var logout_button = $('#logout');
+
+// Get the modal
+var modal = document.getElementById('myModal');
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+
+/* Discord connection */
 discord.onlogin = async() => {
 
     Array.from(document.getElementsByClassName('out')).forEach(x => {
         x.style.display = "none";
     })
     Array.from(document.getElementsByClassName('in')).forEach(x => {
-        x.style.display = 'inline';
+        x.style.display = 'initial';
     })
 
     let user = await discord.fetchUser().catch(console.log);
@@ -18,18 +29,22 @@ discord.onlogin = async() => {
 
     document.getElementById("profil").innerHTML = user.tag
     document.getElementById("avatar").src = user.avatarURL;
-
-    console.log(user);
-    console.log(guilds);
 }
 
 discord.onlogout = async() => {
-    Array.from(document.getElementsByClassName('in')).forEach(x => {
-        x.style.display = "none";
-    });
-    Array.from(document.getElementsByClassName('out')).forEach(x => {
-        x.style.display = 'inline';
-    });
+    if (logout_button.hasClass('toggled')) {
+        Array.from(document.getElementsByClassName('in')).forEach(x => {
+            x.style.display = "none";
+        });
+        Array.from(document.getElementsByClassName('out')).forEach(x => {
+            x.style.display = 'initial';
+        });
+        logout_button.html('&#8677;');
+    }
+    else {
+        logout_button.html('Déconnexion');
+    }
+    logout_button.toggleClass('toggled');
 }
 
 window.onload = () => {
@@ -44,6 +59,8 @@ async function logout() {
     await discord.logout();
 }
 
+
+/* Cells behavior */
 var $cells = $(".filter");
 
 $("#search").keyup(function() {
@@ -78,4 +95,27 @@ function toClipboard(name) {
     status = document.execCommand("copy");
     copyText.value = "!image ";
     $("#command").css({'display': 'none'});
+}
+
+/* Modal */
+// When the user clicks the button, open the modal 
+function openModal(image_name, image_id) {
+    modal.style.display = "block";
+    $('#modal_text').html("Es tu sûr de vouloir effacer l'image \"" + image_name + "\" ?")
+}
+
+// When the user clicks on <span> (x), close the modal
+function closeModal() {
+    modal.style.display = "none";
+}
+
+window.onclick = function(e) {
+    if (logout_button.hasClass('toggled') && !logout_button.is(e.target) && logout_button.has(e.target).length === 0) {
+        logout_button.removeClass('toggled');
+        logout_button.html('&#8677;');
+    }
+    
+    if (e.target == modal) {
+        modal.style.display = "none";
+    }
 }
