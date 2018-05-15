@@ -1,62 +1,13 @@
-/// <reference path="./lwd.d.ts" />
-
-let discord = new LoginWithDiscord({
-    cache: true
-})
-
-// Get the logout button
 var logout_button = $('#logout');
-
-// Get the modal
 var modal = document.getElementById('myModal');
 
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
-
-
-/* Discord connection */
-discord.onlogin = async() => {
-
-    Array.from(document.getElementsByClassName('out')).forEach(x => {
-        x.style.display = "none";
-    })
-    Array.from(document.getElementsByClassName('in')).forEach(x => {
-        x.style.display = 'initial';
-    })
-
-    let user = await discord.fetchUser().catch(console.log);
-    let guilds = await discord.fetchGuilds().catch(console.log);
-
-    document.getElementById("profil").innerHTML = user.tag
-    document.getElementById("avatar").src = user.avatarURL;
-}
-
-discord.onlogout = async() => {
+function logout() {
     if (logout_button.hasClass('toggled')) {
-        Array.from(document.getElementsByClassName('in')).forEach(x => {
-            x.style.display = "none";
-        });
-        Array.from(document.getElementsByClassName('out')).forEach(x => {
-            x.style.display = 'initial';
-        });
-        logout_button.html('&#8677;');
     }
     else {
         logout_button.html('Déconnexion');
     }
     logout_button.toggleClass('toggled');
-}
-
-window.onload = () => {
-    discord.init();
-}
-
-async function login() {
-    await discord.login('443757232476258304', Scope.Identify, Scope.Guilds);
-}
-
-async function logout() {
-    await discord.logout();
 }
 
 
@@ -75,6 +26,8 @@ $("#search").keyup(function() {
     }
 });
 
+
+/* Hovering */
 $(document).mousemove(function(e) {
     $(".hovering_image").css({left:e.pageX + 1 , top:e.pageY + 1 });
 });
@@ -101,7 +54,8 @@ function toClipboard(name) {
 // When the user clicks the button, open the modal 
 function openModal(image_name, image_id) {
     modal.style.display = "block";
-    $('#modal_text').html("Es tu sûr de vouloir effacer l'image \"" + image_name + "\" ?")
+    $("#modal_text").html("Es tu sûr de vouloir effacer l'image \"" + image_name + "\" ?")
+    $("#modal_ok").attr("href", '/delete/' + image_id)
 }
 
 // When the user clicks on <span> (x), close the modal

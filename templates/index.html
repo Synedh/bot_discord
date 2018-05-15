@@ -8,10 +8,11 @@
     </head>
     <body>
         <div class="account">
-            <span class="button out" onclick="login()">Connexion</span>
-            <span class="in" id="profil"></span>
-            <img class="in" id="avatar">
-            <span class="button in logout" id="logout" onclick="logout()">&#8677;</span>
+            {% if not user %}<span class="button"><a href="{{ url_for('connect') }}">Connexion</a></span>
+            {% else %}<span id="profil">{{ user.username }}#{{ user.discriminator }}</span>
+            <img id="avatar" src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}.png">
+            <span class="button upload"><a href="{{ url_for('disconnect') }}">&#8613;</a></span>
+            <span class="button logout" id="logout" onclick="logout()"><a href="{{ url_for('disconnect') }}">&#8677;</a></span>{% endif %}
         </div>
         <h1>Visu discord ThiS is ThE EnD</h1>
         <div class="search">
@@ -22,8 +23,8 @@
             <div class="item-wrapper" onmouseover="hovering('{{ image.url }}')" onmouseout="outhovering()">
                 <div class="icon-wrapper">
                     <a target="_blank" href="{{ image.url }}"><img src="{{ url_for('static', filename='img/eye-icon.png') }}" class="icon see"></a>
-                    <img src="{{ url_for('static', filename='img/fav-icon.png') }}" class="icon fav in">
-                    <img src="{{ url_for('static', filename='img/del-icon.png') }}" class="icon del in" onclick="openModal('{{ image.name }}', '{{ image.id }}')">
+                    {% if is_tite %}<img src="{{ url_for('static', filename='img/fav-icon.png') }}" class="icon fav">{% endif %}
+                    {% if has_perm %}<img src="{{ url_for('static', filename='img/del-icon.png') }}" class="icon del" onclick="openModal('{{ image.name }}', '{{ image.id }}')">{% endif %}
                 </div>
                 <div class="filter name">{{ image.name }}</div>
                 <div class="filter sender">{{ image.sender }}</div>
@@ -43,7 +44,7 @@
             <p id="modal_text">modal_content</p>
             <div class="modal_buttons">
                 <div class="modal_cancel" onclick="closeModal()">Annuler</div>
-                <div class="modal_ok">Oui</div>
+                <div class="modal_ok"><a href="/" id="modal_ok">Oui</a></div>
             </div>
           </div>
 
@@ -51,7 +52,6 @@
 
         <input type="text" value="!image " id="command">
         <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/lwd.js') }}"></script>
         <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     </body>
 </html>
