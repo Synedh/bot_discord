@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Table, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_method
 
 Base = declarative_base()
 
@@ -33,3 +34,11 @@ class User(Base):
     isInTite = Column(Boolean)
     hasEnougthRank = Column(Boolean, default=False)
     images = relationship("Image", secondary=association_table)
+
+    @hybrid_method
+    def fav_images(self):
+        return [image.id for image in self.images]
+
+    def __repr__(self):
+        return ("<User (id='%s', username='%s', isInTite='%s', hasEnougthRank'%s')>" 
+            % (self.id, self.username, self.isInTite, self.hasEnougthRank))

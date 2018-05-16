@@ -1,7 +1,8 @@
+import filters
 import model
 
 import os
-from flask import Flask, render_template, session, request, url_for, redirect, _request_ctx_stack
+from flask import Flask, render_template, session, request, url_for, redirect, _request_ctx_stack, jsonify
 from requests_oauthlib import OAuth2Session
 
 from sqlalchemy import create_engine
@@ -60,36 +61,73 @@ def has_permission(perm):
     return bool(perm & 0x10000000)
 
 
+@app.template_filter()
+def fav_ordering(images, user_images):
+    def isin(image, images):
+        for img in images:
+            if img.id == image.id:
+                return True
+        return False
+
+    favs = []
+    for image in images:
+        if isin(image, user_images):
+            favs.append(image)
+    for image in images:
+        if not isin(image, user_images):
+            favs.append(image)
+    return favs
+
+
 @app.route('/')
 def index():
     discord = make_session(token=session.get('oauth2_token'))
     user = discord.get(API_BASE_URL + '/users/@me').json()
     guilds = discord.get(API_BASE_URL + '/users/@me/guilds').json()
-    connections = discord.get(API_BASE_URL + '/users/@me/connections').json()
-    print(user)
-    if 'code' not in user:
-        s = Session(create_engine('sqlite:///account.db'))
-        if s.query(model.User).filter(model.User.id == user['id']).count() == 0:
-            u = model.User(id=user['id'], username=user.username + '#' + user.discriminator, isInTite=bool(is_tite_in_guilds(guilds), hasEnougthRank=has_permission(is_tite_in_guilds(guilds)['permissions'])))
-            print(u)
-        return render_template('index.html', images=get_images(), user=user, is_tite=is_tite_in_guilds(guilds), has_perm=has_permission(is_tite_in_guilds(guilds)['permissions']))
-    return render_template('index.html', images=get_images())
-
-
-@app.route('/fav/<int:id>')
-def fav_image(id):
-    print(id)
-    return redirect(url_for('index'))
-
-
-@app.route('/delete/<int:id>')
-def delete_image(id):
-    print(id)
+    if 'code' in user:
+        return render_template('index.html', images=get_images())
     s = Session(create_engine('sqlite:///account.db'))
-    image = s.query(model.Image).filter(model.Image.id == id).first()
+    queryuser = s.query(model.User).filter(model.User.id == user['id'])
+    if queryuser.count() == 0:
+        s.add(model.User(id=user['id'], 
+                         username=user['username'] + '#' + user['discriminator'], 
+                         isInTite=bool(is_tite_in_guilds(guilds)), 
+                         hasEnougthRank=has_permission(is_tite_in_guilds(guilds)['permissions'])))
+        s.commit()
+    elif queryuser.first().username != (user['username'] + '#' + user['discriminator']):
+        queryuser.first().username = user['username'] + '#' + user['discriminator']
+        s.commit()
+    elif queryuser.first().isInTite != bool(is_tite_in_guilds(guilds)):
+        queryuser.first().isInTite = bool(is_tite_in_guilds(guilds))
+        s.commit()
+    elif queryuser.first().hasEnougthRank != has_permission(is_tite_in_guilds(guilds)['permissions']):
+        queryuser.first().hasEnougthRank = has_permission(is_tite_in_guilds(guilds)['permissions'])
+        s.commit()
+    return render_template('index.html', images=get_images(), user=queryuser.first(), avatar=user['avatar'])
+
+
+@app.route('/fav/<int:user_id>/<int:image_id>', methods=['POST'])
+def fav_image(user_id, image_id):
+    s = Session(create_engine('sqlite:///account.db'))
+    user = s.query(model.User).filter(model.User.id == user_id).first()
+    image = s.query(model.Image).filter(model.Image.id == image_id).first()
+    if image not in user.images:
+        user.images.append(image)
+        s.commit()
+        return jsonify({'user_id': user.id, 'image_id': image.id, 'action': 'add' })
+    else:
+        user.images.remove(image)
+        s.commit()
+        return jsonify({'user_id': user.id, 'image_id': image.id, 'action': 'remove' })
+
+
+@app.route('/delete/<int:image_id>', methods=['POST'])
+def delete_image(image_id):
+    s = Session(create_engine('sqlite:///account.db'))
+    image = s.query(model.Image).filter(model.Image.id == image_id).first()
     image.active = False
-    session.commit()
-    return redirect(url_for('index'))
+    # s.commit()
+    return jsonify({'id': image.id, 'name': image.name })
 
 
 @app.route('/disconnect')
