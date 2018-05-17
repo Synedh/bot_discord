@@ -79,7 +79,7 @@ body {
     padding: 20px;
     left: 50%;
     border-radius: 5px;
-    transform: translateX(-50%); /* tiré de la moitié de sa propre hauteur */
+    transform: translateX(-50%);
     background-color: #f44336;
     color: white;
     opacity: 0;
@@ -255,6 +255,10 @@ input:focus:-ms-input-placeholder { color:transparent; } /* IE 10+ */
     animation-duration: 0.4s
 }
 
+.modal-content.modal-upload {
+    width: 500px;
+}
+
 /* Add Animation */
 @-webkit-keyframes animatetop {
     from {top:-300px; opacity:0} 
@@ -266,16 +270,49 @@ input:focus:-ms-input-placeholder { color:transparent; } /* IE 10+ */
     to {margin-top:40; opacity:1}
 }
 
-#load_url {
-    width: 80%;
+.validator {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    left: 13px;
+}
+
+.validator > img {
+    display: none;
+    width: 100%;
+}
+
+.upload_field {
+    width: 60%;
     color: #bcbbae;
     padding-left: 5px;
     padding-right: 5px;
+    margin-left: 20px;
     background: transparent;
     border: none;
     outline: 0;
     border-bottom: 1px solid #7f8186;
     margin-bottom: 10px;
+}
+
+.upload_field.upload_name {
+    width: 40%;
+}
+
+.upload_image {
+    position: absolute;
+    top: 20px;
+    right: 50px;
+    background-color: #202527;
+    width: 100px;
+    height: 100px;
+}
+
+.upload_image > img {
+    margin-top: 50%; /* poussé de la moitié de hauteur de viewport */
+    transform: translateY(-50%); /* tiré de la moitié de sa propre hauteur */
+    width: 100%;
+    display: none;
 }
 
 .modal_buttons {

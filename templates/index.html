@@ -12,7 +12,7 @@
                 {% if not user %}<span class="button"><a href="{{ url_for('connect') }}">Connexion</a></span>
                 {% else %}<span id="profil">{{ user.username }}</span>
                 <img id="avatar" src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ avatar }}.png">
-                {% if user.isInTite %}<span class="button upload" onclick="openUploadModal()">&#8613;</span>{% endif %}
+                {% if user.isInTite %}<span class="button upload" onclick="openUploadModal('{{ user.id }}')">&#8613;</span>{% endif %}
                 <span class="button logout" id="logout" onclick="logout()">&#8677;</span>{% endif %}
             </div>
 
@@ -61,13 +61,17 @@
         <div id="uploadModal" class="modal">
 
           <!-- Modal content -->
-          <div class="modal-content">
+          <div class="modal-content modal-upload">
             <span class="close" onclick="closeModal()">&times;</span>
-            <p id="modal_text">Insérez l'url de l'image à enregistrer.</p>
-            <input type="text" id="load_url" name="image_url" placeholder="https://mon.image">
+            <p id="modal_text">Insérez le nom et l'url de l'image à enregistrer.</p>
+            <div class="validator"><img src="" id="validator1"></div>
+            <input class="upload_field upload_name" type="text" id="upload_name" name="image_name" placeholder="Nom_image">
+            <div class="validator"><img src="" id="validator2"></div>
+            <input class="upload_field" type="text" id="upload_url" name="image_url" placeholder="https://mon.image">
+            <div class="upload_image"><img src="" id="upload_image"></div>
             <div class="modal_buttons">
                 <div class="modal_cancel" onclick="closeModal()">Annuler</div>
-                <div class="modal_ok" onclick="send_image()">Envoyer</div>
+                <div class="modal_ok" id="send_image" onclick="uploadImage('{{ user.id }}')">Envoyer</div>
             </div>
           </div>
 

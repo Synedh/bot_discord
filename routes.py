@@ -2,9 +2,9 @@ import filters
 import model
 
 import os
-from flask import Flask, render_template, session, request, url_for, redirect, _request_ctx_stack, jsonify
+from datetime import datetime
 from requests_oauthlib import OAuth2Session
-
+from flask import Flask, render_template, session, request, url_for, redirect, _request_ctx_stack, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -106,8 +106,21 @@ def index():
     return render_template('index.html', images=get_images(), user=queryuser.first(), avatar=user['avatar'])
 
 
-@app.route('/fav/<int:user_id>/<int:image_id>', methods=['POST'])
-def fav_image(user_id, image_id):
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    user_id = request.json['user_id']
+    image_name = request.json['image_name']
+    image_url = request.json['image_url']
+    s = Session(create_engine('sqlite:///account.db'))
+    user = s.query(model.User).filter(model.User.id == user_id).first()
+    s.add(model.Image(name=image_name, date=datetime.now(), sender=user.username, url=image_url, used=0))
+    return jsonify({'user_id': user.id, 'image_name': image_name, 'url': image_url})
+
+
+@app.route('/fav', methods=['POST'])
+def fav_image():
+    user_id = request.json['user_id']
+    image_id = request.json['image_id']
     s = Session(create_engine('sqlite:///account.db'))
     user = s.query(model.User).filter(model.User.id == user_id).first()
     image = s.query(model.Image).filter(model.Image.id == image_id).first()
@@ -121,8 +134,9 @@ def fav_image(user_id, image_id):
         return jsonify({'user_id': user.id, 'image_id': image.id, 'action': 'remove' })
 
 
-@app.route('/delete/<int:image_id>', methods=['POST'])
-def delete_image(image_id):
+@app.route('/delete', methods=['POST'])
+def delete_image():
+    image_id = request.json['image_id']
     s = Session(create_engine('sqlite:///account.db'))
     image = s.query(model.Image).filter(model.Image.id == image_id).first()
     image.active = False
@@ -133,7 +147,6 @@ def delete_image(image_id):
 @app.route('/disconnect')
 def disconnect():
     return redirect(url_for('index'))
-
 
 
 @app.route('/connect')
