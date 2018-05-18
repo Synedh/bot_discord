@@ -10,7 +10,7 @@ import model
 
 token = None
 with open('token') as file:
-    token = file.readline()[:-1]
+    token = file.readline()[:-1].split('=')[1]
 
 bot = Bot(command_prefix=("!"))
 engine = create_engine('sqlite:///account.db')

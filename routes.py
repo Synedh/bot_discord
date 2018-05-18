@@ -8,13 +8,13 @@ from flask import Flask, render_template, session, request, url_for, redirect, _
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-OAUTH2_CLIENT_ID = '443757232476258304'
-# OAUTH2_CLIENT_ID = os.environ['OAUTH2_CLIENT_ID']
-OAUTH2_CLIENT_SECRET = 'LCF32gCD-7s77co5Fnvak5A5b-yZ8Gk8'
-# OAUTH2_CLIENT_SECRET = os.environ['OAUTH2_CLIENT_SECRET']
-OAUTH2_REDIRECT_URI = 'http://localhost:5000/callback'
+with open('token') as file:
+    file.readline()
+    OAUTH2_CLIENT_ID = file.readline()[:-1].split('=')[1]
+    OAUTH2_CLIENT_SECRET = file.readline()[:-1].split('=')[1]
+    OAUTH2_REDIRECT_URI = file.readline()[:-1].split('=')[1]
 
-API_BASE_URL = os.environ.get('API_BASE_URL', 'https://discordapp.com/api')
+API_BASE_URL = 'https://discordapp.com/api'
 AUTHORIZATION_BASE_URL = API_BASE_URL + '/oauth2/authorize'
 TOKEN_URL = API_BASE_URL + '/oauth2/token'
 
