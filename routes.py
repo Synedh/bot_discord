@@ -62,12 +62,17 @@ def has_permission(perm):
 
 
 @app.template_filter()
-def fav_ordering(images, user_images):
+def fav_ordering(images, user):
     def isin(image, images):
         for img in images:
             if img.id == image.id:
                 return True
         return False
+
+    try:
+        user_images = user.images
+    except AttributeError as e:
+        return images
 
     favs = []
     for image in images:
@@ -85,7 +90,7 @@ def index():
     user = discord.get(API_BASE_URL + '/users/@me').json()
     guilds = discord.get(API_BASE_URL + '/users/@me/guilds').json()
     if 'code' in user:
-        return render_template('index.html', images=get_images())
+        return render_template('index.html', images=get_images(), user=None)
     s = Session(create_engine('sqlite:///account.db'))
     queryuser = s.query(model.User).filter(model.User.id == user['id'])
     if queryuser.count() == 0:
@@ -114,6 +119,7 @@ def upload_image():
     s = Session(create_engine('sqlite:///account.db'))
     user = s.query(model.User).filter(model.User.id == user_id).first()
     s.add(model.Image(name=image_name, date=datetime.now(), sender=user.username, url=image_url, used=0))
+    s.commit()
     return jsonify({'user_id': user.id, 'image_name': image_name, 'url': image_url})
 
 
@@ -140,7 +146,7 @@ def delete_image():
     s = Session(create_engine('sqlite:///account.db'))
     image = s.query(model.Image).filter(model.Image.id == image_id).first()
     image.active = False
-    # s.commit()
+    s.commit()
     return jsonify({'id': image.id, 'name': image.name })
 
 

@@ -20,13 +20,18 @@
                 <span class="closebtn">&times;</span>
                 Alert content
             </div>
+
+            <div class="alert valid" id="alert_valid" onclick="close_alert('alert_danger')">
+                <span class="closebtn">&times;</span>
+                Alert content
+            </div>
         </div>
-        <h1>Visu discord ThiS is ThE EnD</h1>
+        <a href="{{ url_for('index') }}"><h1>Visu discord ThiS is ThE EnD</h1></a>
         <div class="search">
             <input id="search" type="text" placeholder="Rechercher">
         </div>
         <div class="content-wrapper">
-        {% for image in images|fav_ordering(user.images) %}
+        {% for image in images|fav_ordering(user) %}
             <div class="item-wrapper" onmouseover="hovering('{{ image.url }}')" onmouseout="outhovering()" id="image_{{ image.id }}">
                 <div class="icon-wrapper">
                     <a target="_blank" href="{{ image.url }}"><img src="{{ url_for('static', filename='img/eye-icon.png') }}" class="icon see"></a>

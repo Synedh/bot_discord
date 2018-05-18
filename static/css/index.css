@@ -75,13 +75,12 @@ body {
     width: 89.344px;
 }
 
-#alert_danger {
+.alert {
+    display: none;
     padding: 20px;
     left: 50%;
     border-radius: 5px;
     transform: translateX(-50%);
-    background-color: #f44336;
-    color: white;
     opacity: 0;
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
     transition: opacity 0.5s;
@@ -90,7 +89,17 @@ body {
     width: 60%;
 }
 
-#alert_danger > .closebtn {
+.alert.danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.alert.valid {
+    background-color: #43b581;
+    color: white;
+}
+
+.alert > .closebtn {
     margin-left: 15px;
     color: white;
     font-weight: bold;
@@ -101,7 +110,9 @@ body {
     transition: 0.3s;
 }
 
-h1 {
+a, a h1 {
+    text-decoration: none;
+    color: #fff;
     font-variant: small-caps;
     text-align: center;
 }

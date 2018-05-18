@@ -14,14 +14,18 @@ function logout() {
 /* === Delete Image === */
 function display_alert(id, content) {
     $("#" + id).html(content);
+    $("#" + id).css({"display": "block"});
     $("#" + id).css({"opacity": "0.9"});
     setTimeout(function() {
-        $("#" + id).css({"opacity": "0"});
-    }, 5000);
+        close_alert(id);
+    }, 4000);
 }
 
 function close_alert(id) {
     $("#" + id).css({"opacity": "0"});
+    setTimeout(function() {
+        $("#" + id).css({"display": "none"});
+    }, 500);
 }
 
 function delete_image(image_id) {
@@ -124,6 +128,7 @@ function closeModal() {
     $("#validator2").css("display", "none");
 }
 
+// Upload validators
 function preview_image() {
     url = $("#upload_url").val();
     var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
@@ -131,64 +136,82 @@ function preview_image() {
     var preview = $("#upload_image");
     if (regex.test(url) && imageTypes.indexOf(url.split(".")[url.split(".").length - 1]) > - 1) {
         preview
-            .on("error", function() { image_loaded=false; })
-            .on("load", function() { image_loaded=true; })
             .attr("src", url)
             .css("display", "block");
-        $('.upload_image').css("background", "transparent");
+        $(".upload_image").css("background", "transparent");
+        return true;
     }
     else {
-        $('.upload_image').css("background", "#202527FF");
+        $(".upload_image").css("background", "#202527FF");
         preview.css("display", "none");
+        return false;
     }
 }
 
-function validate_data() {
-    var url = $("#upload_url").val();
-    var image_name = $("#upload_name").val();
-    var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-    var imageTypes = ["jpg", "bmp", "png", "gif"];
+function set_valid(jquery_validator) {
+    jquery_validator.attr("src", "static/img/valid_icon.png");
+    jquery_validator.css("display", "block");
+}
 
-    if (regex.test(url) 
-        && imageTypes.indexOf(url.split(".")[url.split(".").length - 1]) > -1
-        && image_name != ""
-        && image_name.split().length == 1) {
-        return image_loaded;
+function set_unvalid(jquery_validator) {
+    jquery_validator.attr("src", "static/img/fail_icon.png");
+    jquery_validator.css("display", "block");
+}
+
+function validate_name() {
+    var image_name = $("#upload_name").val();
+    if (image_name != "" && image_name.split(" ").length == 1 ) {
+        set_valid($("#validator1"));
+        return true;
     }
     else {
-        if (image_name == "" || image_name.split(" ").length > 1) {
-            $("#validator1").attr("src", "static/img/fail_icon.png");
-            $("#validator1").css("display", "block");
-        }
-        if (!regex.test(url) || imageTypes.indexOf(url.split(".")[url.split(".").length - 1]) < 0) {
-            $("#validator2").attr("src", "static/img/fail_icon.png");
-            $("#validator2").css("display", "block");
-        }
+        set_unvalid($("#validator1"));
         return false;
     }
+}
 
+function validate_url() {
+    var url = $("#upload_url").val();
+    var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+    var imageTypes = ["jpg", "bmp", "png", "gif"];
+    if (regex.test(url) 
+        && imageTypes.indexOf(url.split(".")[url.split(".").length - 1]) > -1) {
+        set_valid($("#validator2"));
+        return true;
+    }
+    else {
+        set_unvalid($("#validator2"));
+        return false;
+    }
 }
 
 function uploadImage(user_id) {
     var url = $("#upload_url").val();
     var image_name = $("#upload_name").val();
 
-    if (validate_data()) {
+    if (validate_name() && validate_url() && image_loaded) {
         $.ajax({
             method: "POST",
             url: "/upload",
             contentType: "application/json;charset=UTF-8",
             data: JSON.stringify({"user_id": user_id, "image_name": image_name,"image_url": url}),
             success: function(data) {
-                console.log(data);
-                closeModal();
+                sessionStorage.setItem("validUpload", image_name);
+                document.location.reload();
             }
         });
     }
 }
 
-$("#upload_name").keyup(function() { validate_data(); });
-$("#upload_url").keyup(function() { validate_data(); preview_image(); });
+$("#upload_name").keyup(function() { validate_name(); });
+$("#upload_url").keyup(function() { validate_url(); preview_image(); });
+$("#upload_image")
+    .on("error", function() { 
+        image_loaded=false;
+        set_unvalid($("#validator2"));
+        $(".upload_image").css("background", "#202527FF");
+        $("#upload_image").css("display", "none");
+}).on("load", function() { image_loaded=true; })
 
 window.onclick = function(e) {
     if (logout_button.hasClass("toggled") && !logout_button.is(e.target) && logout_button.has(e.target).length === 0) {
@@ -199,5 +222,13 @@ window.onclick = function(e) {
     if (e.target == document.getElementById("deleteModal") 
         || e.target == document.getElementById("uploadModal")) {
         closeModal();
+    }
+}
+
+window.onload = function() {
+    var image_name = sessionStorage.getItem("validUpload");
+    if (image_name) {
+        sessionStorage.removeItem("validUpload");
+        display_alert("alert_valid", "Image \"" + image_name + "\" envoyée avec succès !");
     }
 }
