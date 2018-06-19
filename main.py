@@ -2,8 +2,10 @@ import random
 import discord
 from discord.ext.commands import Bot
 from discord.errors import HTTPException, NotFound
+from discord.ext.commands.errors import CommandNotFound
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 import images
 import model
@@ -126,9 +128,11 @@ async def pick(*choices: str):
 
 @bot.event
 async def on_message(message):
-    # print('{0} - {1} - {2} - {3}'.format(message.server, message.channel, message.author, message.content))
     if len(message.content) > 0 and message.content.split()[0][1:] in command_list:
+        with open('commands.log', "a+") as file:
+            file.write('{0};{1};{2};{3};{4}\n'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), message.server, message.channel, message.author, message.content))
         await bot.process_commands(message)
+
 
 @bot.event
 async def on_ready():

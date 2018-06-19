@@ -3,6 +3,13 @@ var image_loaded = false;
 
 function logout() {
     if (logout_button.hasClass("toggled")) {
+        $.ajax({
+            method: "GET",
+            url: "/disconnect",
+            success: function(data) {
+                if (data["success"]) { window.location.reload(); }
+            }
+        })
         logout_button.html("&#8677;");
     }
     else {

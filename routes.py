@@ -152,7 +152,8 @@ def delete_image():
 
 @app.route('/disconnect')
 def disconnect():
-    return redirect(url_for('index'))
+    session.clear()
+    return jsonify({'success': True})
 
 
 @app.route('/connect')
