@@ -1,5 +1,6 @@
 import filters
 import model
+import images
 
 import os
 from datetime import datetime
@@ -118,8 +119,7 @@ def upload_image():
     image_url = request.json['image_url']
     s = Session(create_engine('sqlite:///account.db'))
     user = s.query(model.User).filter(model.User.id == user_id).first()
-    s.add(model.Image(name=image_name, date=datetime.now(), sender=user.username, url=image_url, used=0))
-    s.commit()
+    images.save_image(s, image_url, image_name, user.username)
     return jsonify({'user_id': user.id, 'image_name': image_name, 'url': image_url})
 
 
