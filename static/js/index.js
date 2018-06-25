@@ -239,3 +239,7 @@ window.onload = function() {
         display_alert("alert_valid", "Image \"" + image_name + "\" envoyée avec succès !");
     }
 }
+
+window.onkeydown = function() {
+    document.getElementById("search").focus();
+}
