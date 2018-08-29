@@ -45,7 +45,7 @@ async def save_image(ctx, img_name=None):
         await bot.say('No given name.')
     else:
         try:
-            saved = images.save_image(session, ctx.message.attachments[0]['url'], img_name, ctx.message.author.display_name)
+            saved = images.save_image(session, ctx.message.attachments[0]['url'], img_name, str(ctx.message.author))
             await bot.say(saved['msg'])
         except IndexError as e:
             await bot.say('No given image.')

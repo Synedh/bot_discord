@@ -52,7 +52,7 @@ body {
 .account .upload {
     background-color: #f04747;
     font-size: 25px;
-    padding: 0px 13px;
+    padding: 0px 11px;
     margin-right: 5px;
 }
 
@@ -178,6 +178,7 @@ input:focus:-ms-input-placeholder { color:transparent; } /* IE 10+ */
 
 .sender {
     padding-top: 10px;
+    margin-bottom: 20px;
 }
 
 .used {
@@ -215,9 +216,11 @@ input:focus:-ms-input-placeholder { color:transparent; } /* IE 10+ */
 }
 
 .link {
+    position: absolute;
     text-align: center;
-    margin-top: 10px;
     background-color: #484c52;
+    bottom: 10px;
+    width: 150px;
     padding-top: 3px;
     padding-bottom: 3px;
     border-radius: 3px;
