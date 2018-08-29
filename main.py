@@ -9,6 +9,7 @@ from datetime import datetime
 
 import images
 import model
+from commands.moreorless import MoreOrLess
 
 token = None
 with open('token') as file:
@@ -25,10 +26,12 @@ command_list = [
     'image',
     'delete_image',
     'list_images',
+    'more_or_less',
     'quote',
     'roll',
     'pick'
 ]
+mol = None
 
 
 @bot.command(pass_context=True)
@@ -125,6 +128,32 @@ async def pick(*choices: str):
     else:
         await bot.say('No value to pick !')
 
+
+@bot.command()
+async def more_or_less(*args: str):
+    global mol
+    if args[0] == 'start':
+        mol = MoreOrLess()
+        await bot.say('Started new More or Less game.')
+        await bot.say(mol.message1())
+    elif mol and args[0] == 'stop':
+        await bot.say(mol.message3())
+        mol = None
+    else:
+        try:
+            status, message = mol.entry(int(args[0]))
+            await bot.say(message)
+            if status == 1:
+                await bot.say(mol.message1())
+            elif status == 2:
+                await bot.say(mol.message2())
+            elif status == 3:
+                await bot.say(mol.message3())
+                mol = None
+        except ValueError as e:
+            await bot.say('Invalid given value %s : must be an integer.' % args[0])
+        except AttributeError as e:
+            await bot.say('Not any game started. Type "!more_or_less start" to start new game.')
 
 @bot.event
 async def on_message(message):
