@@ -10,6 +10,7 @@ from datetime import datetime
 import images
 import model
 from commands.moreorless import MoreOrLess
+from commands.hangman import Hangman
 
 token = None
 with open('token') as file:
@@ -27,11 +28,13 @@ command_list = [
     'delete_image',
     'list_images',
     'more_or_less',
+    'pendu',
     'quote',
     'roll',
     'pick'
 ]
 mol = None
+mh = None
 
 
 @bot.command(pass_context=True)
@@ -75,7 +78,7 @@ async def delete_image(img_name=None):
 
 @bot.command(pass_context=True)
 async def list_images(ctx):
-    await bot.say('Deprecated command, go to https://c.ddns.net instead.')
+    await bot.say('Deprecated command, go to https://tite.synedh.fr instead.')
     # msgs = images.get_list(session)
     # for msg in msgs:
     #     await bot.send_message(ctx.message.author, '```' + msg + '```')
@@ -154,6 +157,39 @@ async def more_or_less(*args: str):
             await bot.say('Invalid given value %s : must be an integer.' % args[0])
         except AttributeError as e:
             await bot.say('Not any game started. Type "!more_or_less start" to start new game.')
+
+
+@bot.command()
+async def pendu(*args: str):
+    global hm
+    if args[0] == 'start':
+        hm = Hangman()
+        await bot.say('Démarré nouveau pendu.')
+        await bot.say(hm.print_stats())
+        await bot.say(hm.turn_message)
+    elif hm and args[0] == 'stop':
+        await bot.say(hm.close_message)
+        hm = None
+    elif hm:
+        status, message = hm.try_value(args[0].upper())
+        await bot.say(message)
+        if status == 0:
+            await bot.say(hm.turn_message)
+        elif status == 1:
+            await bot.say(hm.print_stats())
+            await bot.say(hm.turn_message)
+        elif status == 2:
+            await bot.say(hm.print_stats())
+            await bot.say(hm.defeat_message)
+            await bot.say(hm.close_message)
+            hm = None
+        elif status == 3:
+            await bot.say(hm.print_stats())
+            await bot.say(hm.victory_message)
+            await bot.say(hm.close_message)
+            hm = None
+    else:
+        await bot.say('Invalid given value %s : do you want to start a new game ?' % args[0])
 
 @bot.event
 async def on_message(message):
