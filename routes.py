@@ -54,7 +54,7 @@ def get_images():
 def is_tite_in_guilds(guilds):
     for guild in guilds:
         if guild['id'] == '202909295526805505':
-            return guild
+            return True
     return False
 
 
@@ -97,18 +97,16 @@ def index():
     if queryuser.count() == 0:
         s.add(model.User(id=user['id'], 
                          username=user['username'] + '#' + user['discriminator'], 
-                         isInTite=bool(is_tite_in_guilds(guilds)), 
+                         isInTite=is_tite_in_guilds(guilds), 
                          hasEnougthRank=has_permission(is_tite_in_guilds(guilds)['permissions'])))
-        s.commit()
-    elif queryuser.first().username != (user['username'] + '#' + user['discriminator']):
-        queryuser.first().username = user['username'] + '#' + user['discriminator']
-        s.commit()
-    elif queryuser.first().isInTite != bool(is_tite_in_guilds(guilds)):
-        queryuser.first().isInTite = bool(is_tite_in_guilds(guilds))
-        s.commit()
-    elif queryuser.first().hasEnougthRank != has_permission(is_tite_in_guilds(guilds)['permissions']):
-        queryuser.first().hasEnougthRank = has_permission(is_tite_in_guilds(guilds)['permissions'])
-        s.commit()
+    else:
+        if queryuser.first().username != (user['username'] + '#' + user['discriminator']):
+            queryuser.first().username = user['username'] + '#' + user['discriminator']
+        if queryuser.first().isInTite != bool(is_tite_in_guilds(guilds)):
+            queryuser.first().isInTite = bool(is_tite_in_guilds(guilds))
+        if queryuser.first().hasEnougthRank != has_permission(is_tite_in_guilds(guilds)['permissions']):
+            queryuser.first().hasEnougthRank = has_permission(is_tite_in_guilds(guilds)['permissions'])
+    s.commit()
     return render_template('index.html', images=get_images(), user=queryuser.first(), avatar=user['avatar'])
 
 

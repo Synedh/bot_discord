@@ -3,6 +3,7 @@ body {
     background-color: #36393e;
     color: #fff;
     max-width: 80%;
+    margin-top: 0;
     margin-left: auto;
     margin-right: auto;
 }
@@ -18,9 +19,8 @@ body {
     position: absolute;
     display: flex;
     align-items: center;
-    top: 0;
+    justify-content: flex-end;
     right: 0;
-    text-align: right;
 }
 
 .account #profil {
@@ -115,6 +115,12 @@ a, a h1 {
     color: #fff;
     font-variant: small-caps;
     text-align: center;
+}
+
+@media only screen and (max-width: 800px) {
+    .account {
+        position: relative;
+    }
 }
 
 .search {

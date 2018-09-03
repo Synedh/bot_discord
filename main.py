@@ -1,3 +1,4 @@
+import os
 import random
 import discord
 from discord.ext.commands import Bot
@@ -7,10 +8,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-import images
 import model
-from commands.moreorless import MoreOrLess
-from commands.hangman import Hangman
+from bot import images, stats
+from bot.hangman import Hangman
+from bot.moreorless import MoreOrLess
 
 token = None
 with open('token') as file:
@@ -21,6 +22,7 @@ engine = create_engine('sqlite:///account.db')
 session = Session(engine)
 model.Base.metadata.create_all(engine)
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 command_list = [
     'hello',
     'save_image',
@@ -31,7 +33,8 @@ command_list = [
     'pendu',
     'quote',
     'roll',
-    'pick'
+    'pick',
+    'week_stats'
 ]
 mol = None
 mh = None
@@ -191,10 +194,17 @@ async def pendu(*args: str):
     else:
         await bot.say('Invalid given value %s : do you want to start a new game ?' % args[0])
 
+
+@bot.command(pass_context=True)
+async def week_stats(ctx):
+    await bot.say(stats.week_stats(session, ctx.message.server))
+
+
 @bot.event
 async def on_message(message):
+    stats.add_entry(session, message)
     if len(message.content) > 0 and message.content.split()[0][1:] in command_list:
-        with open('commands.log', "a+") as file:
+        with open(dir_path + '/log/commands.log', "a+") as file:
             file.write('{0};{1};{2};{3};{4}\n'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), message.server, message.channel, message.author, message.content))
         await bot.process_commands(message)
 

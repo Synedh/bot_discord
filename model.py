@@ -6,9 +6,14 @@ from sqlalchemy.ext.hybrid import hybrid_method
 
 Base = declarative_base()
 
-association_table = Table('association', Base.metadata,
+association_image_user = Table('association_image_user', Base.metadata,
     Column('image_id', Integer, ForeignKey('Image.id')),
     Column('user_id', Integer, ForeignKey('User.id'))
+)
+
+association_stats = Table('association_stats', Base.metadata,
+    Column('channelstats_id', Integer, ForeignKey('ChannelStats.id')),
+    Column('userstats_id', Integer, ForeignKey('UserStats.id'))
 )
 
 class Image(Base):
@@ -23,7 +28,8 @@ class Image(Base):
     used = Column(Integer)
 
     def __repr__(self):
-        return "<Image (name='%s', date='%s', sender='%s')>" % (self.name, str(self.date), self.sender)
+        return ("<Image (name='%s', date='%s', sender='%s')>" 
+            % (self.name, str(self.date), self.sender))
 
 
 class User(Base):
@@ -33,7 +39,7 @@ class User(Base):
     username = Column(String)
     isInTite = Column(Boolean)
     hasEnougthRank = Column(Boolean, default=False)
-    images = relationship("Image", secondary=association_table)
+    images = relationship("Image", secondary=association_image_user)
 
     @hybrid_method
     def fav_images(self):
@@ -42,3 +48,24 @@ class User(Base):
     def __repr__(self):
         return ("<User (id='%s', username='%s', isInTite='%s', hasEnougthRank'%s')>" 
             % (self.id, self.username, self.isInTite, self.hasEnougthRank))
+
+
+class Message(Base):
+    __tablename__ = 'Message'
+
+    id = Column(Integer, primary_key=True)
+    text = Column(String)
+    server = Column(String)
+    channel = Column(String)
+    user_id = Column(Integer, ForeignKey('User.id'))
+    user = relationship('User')
+    date = Column(DateTime)
+
+
+### ADD TABLES ###
+# import model
+# from sqlalchemy import create_engine
+# from sqlalchemy.orm import Session
+# engine = create_engine('sqlite:///account.db')
+# session = Session(engine)
+# model.Base.metadata.create_all(engine)

@@ -5,3 +5,4 @@ bin/
 lib/
 account.db
 *.log
+*.pyc
