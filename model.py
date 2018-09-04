@@ -6,14 +6,9 @@ from sqlalchemy.ext.hybrid import hybrid_method
 
 Base = declarative_base()
 
-association_image_user = Table('association_image_user', Base.metadata,
+association_table = Table('association', Base.metadata,
     Column('image_id', Integer, ForeignKey('Image.id')),
     Column('user_id', Integer, ForeignKey('User.id'))
-)
-
-association_stats = Table('association_stats', Base.metadata,
-    Column('channelstats_id', Integer, ForeignKey('ChannelStats.id')),
-    Column('userstats_id', Integer, ForeignKey('UserStats.id'))
 )
 
 class Image(Base):
@@ -39,7 +34,7 @@ class User(Base):
     username = Column(String)
     isInTite = Column(Boolean)
     hasEnougthRank = Column(Boolean, default=False)
-    images = relationship("Image", secondary=association_image_user)
+    images = relationship("Image", secondary=association_table)
 
     @hybrid_method
     def fav_images(self):
