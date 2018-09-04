@@ -1,5 +1,6 @@
 var logout_button = $("#logout");
 var image_loaded = false;
+var modal_open = false;
 
 function logout() {
     if (logout_button.hasClass("toggled")) {
@@ -115,6 +116,7 @@ function toClipboard(name) {
 /* === Modals === */
 // Delete Modal
 function openDeleteModal(image_name, image_id) {
+    modal_open = true;
     document.getElementById("deleteModal").style.display = "block";
     $("#modal_text").html("Es tu sûr de vouloir effacer l'image \"" + image_name + "\" ?")
     $("#modal_ok").click(function () { delete_image(image_id); });
@@ -122,6 +124,7 @@ function openDeleteModal(image_name, image_id) {
 
 // Upload Modal
 function openUploadModal(user_id) {
+    modal_open = true;
     document.getElementById("uploadModal").style.display = "block";
 }
 
@@ -133,6 +136,7 @@ function closeModal() {
     $("#upload_name").val("");
     $("#validator1").css("display", "none");
     $("#validator2").css("display", "none");
+    modal_open = false;
 }
 
 // Upload validators
@@ -241,5 +245,7 @@ window.onload = function() {
 }
 
 window.onkeydown = function() {
-    document.getElementById("search").focus();
+    if (!modal_open) {
+        document.getElementById("search").focus();
+    }
 }

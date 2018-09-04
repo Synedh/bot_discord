@@ -1,6 +1,5 @@
-import filters
 import model
-import images
+from bot import images
 
 import os
 from datetime import datetime
@@ -46,15 +45,14 @@ def make_session(token=None, state=None, scope=None):
         token_updater=token_updater)
 
 
-def get_images():
-    s = Session(create_engine('sqlite:///account.db'))
+def get_images(s):
     return [image for image in s.query(model.Image).filter(model.Image.active)]
 
 
 def is_tite_in_guilds(guilds):
     for guild in guilds:
         if guild['id'] == '202909295526805505':
-            return True
+            return guild
     return False
 
 
@@ -90,15 +88,17 @@ def index():
     discord = make_session(token=session.get('oauth2_token'))
     user = discord.get(API_BASE_URL + '/users/@me').json()
     guilds = discord.get(API_BASE_URL + '/users/@me/guilds').json()
-    if 'code' in user:
-        return render_template('index.html', images=get_images(), user=None)
     s = Session(create_engine('sqlite:///account.db'))
+    if 'code' in user:
+        return render_template('index.html', images=get_images(s), user=None)
     queryuser = s.query(model.User).filter(model.User.id == user['id'])
     if queryuser.count() == 0:
-        s.add(model.User(id=user['id'], 
-                         username=user['username'] + '#' + user['discriminator'], 
-                         isInTite=is_tite_in_guilds(guilds), 
-                         hasEnougthRank=has_permission(is_tite_in_guilds(guilds)['permissions'])))
+        s.add(model.User(
+            id=user['id'], 
+            username=user['username'] + '#' + user['discriminator'], 
+            isInTite=bool(is_tite_in_guilds(guilds)), 
+            hasEnougthRank=has_permission(is_tite_in_guilds(guilds)['permissions'])
+        ))
     else:
         if queryuser.first().username != (user['username'] + '#' + user['discriminator']):
             queryuser.first().username = user['username'] + '#' + user['discriminator']
@@ -107,7 +107,7 @@ def index():
         if queryuser.first().hasEnougthRank != has_permission(is_tite_in_guilds(guilds)['permissions']):
             queryuser.first().hasEnougthRank = has_permission(is_tite_in_guilds(guilds)['permissions'])
     s.commit()
-    return render_template('index.html', images=get_images(), user=queryuser.first(), avatar=user['avatar'])
+    return render_template('index.html', images=get_images(s), user=queryuser.first(), avatar=user['avatar'])
 
 
 @app.route('/upload', methods=['POST'])
