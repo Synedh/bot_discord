@@ -34,9 +34,9 @@
         {% for image in images|fav_ordering(user) %}
             <div class="item-wrapper" onmouseover="hovering('{{ image.url }}')" onmouseout="outhovering()" id="image_{{ image.id }}">
                 <div class="icon-wrapper">
-                    <a target="_blank" href="{{ image.url }}"><img src="{{ url_for('static', filename='img/eye-icon.png') }}" class="icon see"></a>
-                    {% if user.isInTite %}<img src="{{ url_for('static', filename='img/fav-icon.png') }}" class="icon fav {% if image.id in user.fav_images() %}selected{% endif %}" onclick="fav_image('{{ user.id }}', '{{ image.id }}')">{% endif %}
-                    {% if user.hasEnougthRank %}<img src="{{ url_for('static', filename='img/del-icon.png') }}" class="icon del" onclick="openDeleteModal('{{ image.name }}', '{{ image.id }}')">{% endif %}
+                    <a target="_blank" href="{{ image.url }}"><img src="{{ url_for('static', filename='img/eye-icon.png') }}" alt="open in new tab" class="icon see"></a>
+                    {% if user.isInTite %}<img src="{{ url_for('static', filename='img/fav-icon.png') }}" alt="add to favorites" class="icon fav {% if image.id in user.fav_images() %}selected{% endif %}" onclick="fav_image('{{ user.id }}', '{{ image.id }}')">{% endif %}
+                    {% if user.hasEnougthRank %}<img src="{{ url_for('static', filename='img/del-icon.png') }}" alt="delete image" class="icon del" onclick="openDeleteModal('{{ image.name }}', '{{ image.id }}')">{% endif %}
                 </div>
                 <div class="filter name">{{ image.name }}</div>
                 <div class="filter sender">{{ image.sender }}</div>
@@ -68,12 +68,12 @@
           <!-- Modal content -->
           <div class="modal-content modal-upload">
             <span class="close" onclick="closeModal()">&times;</span>
-            <p id="modal_text">Insérez le nom et l'url de l'image à enregistrer.</p>
-            <div class="validator"><img src="" id="validator1"></div>
+            <p>Insérez le nom et l'url de l'image à enregistrer.</p>
+            <div class="validator"><img src="#" alt="validator" id="validator1"></div>
             <input class="upload_field upload_name" type="text" id="upload_name" name="image_name" placeholder="Nom_image">
-            <div class="validator"><img src="" id="validator2"></div>
+            <div class="validator"><img src="#" alt="validator" id="validator2"></div>
             <input class="upload_field" type="text" id="upload_url" name="image_url" placeholder="https://mon.image">
-            <div class="upload_image"><img src="" id="upload_image"></div>
+            <div class="upload_image"><img src="#" alt="upload image" id="upload_image"></div>
             <div class="modal_buttons">
                 <div class="modal_cancel" onclick="closeModal()">Annuler</div>
                 <div class="modal_ok" id="send_image" onclick="uploadImage('{{ user.id }}')">Envoyer</div>
