@@ -34,7 +34,8 @@ command_list = [
     'quote',
     'roll',
     'pick',
-    'week_stats'
+    'week_stats',
+    'user_stats'
 ]
 mol = None
 mh = None
@@ -159,8 +160,8 @@ async def more_or_less(*args: str):
         except ValueError as e:
             await bot.say('Invalid given value %s : must be an integer.' % args[0])
         except AttributeError as e:
-            await bot.say('Not any game started. Type "!more_or_less start" to start new game.')
-
+            await bot.say('Not any game started. Type "!more_or_less start" to start new game.'
+)
 
 @bot.command()
 async def pendu(*args: str):
@@ -194,10 +195,12 @@ async def pendu(*args: str):
     else:
         await bot.say('Invalid given value %s : do you want to start a new game ?' % args[0])
 
-
 @bot.command(pass_context=True)
-async def week_stats(ctx):
-    await bot.say(stats.week_stats(session, ctx.message.server))
+async def week_stats(ctx, user: str=''):
+    if user == '':
+        await bot.say(stats.week_stats(session, ctx.message.server))
+    else:
+        await bot.say(stats.user_stats(session, ctx.message.server, user))
 
 
 @bot.event
