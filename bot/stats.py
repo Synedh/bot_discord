@@ -59,18 +59,21 @@ def user_stats(session, server, user_id):
     date_stats = {}
     channel_stats = {}
 
+
     try:
         query = session.query(model.Message).filter(
-            model.Message.server == str(server) 
-            and model.Message.user.id == int(user_id[2:-1])
+            model.Message.server == str(server)
+        ).filter(
+            model.Message.user_id == int(user_id[2:-1])
         )
     except ValueError as e:
         query = session.query(model.Message).filter(
-            model.Message.server == str(server) 
-            and model.Message.user.username == user_id[1:]
+            model.Message.server == str(server)
+        ).filter(
+            model.Message.user.username == user_id[1:]
         )
         if query.count > 0:
-            user_id = '<@' + query.first().user.id + '>'
+            user_id = '<@' + query.first().user_id + '>'
     for message in query:
         date = message.date.strftime('%W-%Y')
         if date == datetime.now().strftime('%W-%Y'):

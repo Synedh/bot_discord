@@ -56,6 +56,9 @@ class Message(Base):
     user = relationship('User')
     date = Column(DateTime)
 
+    def __repr__(self):
+        return ("<Message (id='%s', text='%s', server='%s', channel='%s', user='%s', date='%s')>"
+           % (self.id, self.text[:20], self.server, self.channel, self.user.username, self.date.strftime('%d-%m-%Y %H:%M:%S')))
 
 ### ADD TABLES ###
 # import model
