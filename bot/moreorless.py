@@ -45,35 +45,3 @@ class MoreOrLess:
         else:
             self.max_value = value
             return 2, 'Correct value is lower !'
-
-
-# init = False
-# i = 0
-# max_value = 0
-# selected_value = 0
-
-# def mol(args: str):
-
-#     if !init:
-#         return ""
-#     return args
-
-# while max_value <= 0 or max_value >= 1000000:
-#     print('PLUS OU MOINS - Quelle valeur maximum ?')
-#     max_value = input()
-
-# print('PLUS OU MOINS - Valeur max : %d.' % max_value)
-# value = random.randint(1, max_value)
-
-# while selected_value != value:
-#     i += 1
-#     print('PLUS OU MOINS - Donnez une valeur')
-#     selected_value = input()
-#     if selected_value == value:
-#         print('PLUS OU MOINS - C\'est bon !')
-#         break;
-#     elif selected_value < value:
-#         print('PLUS OU MOINS - C\'est plus !')
-#     elif selected_value > value:
-#         print('PLUS OU MOINS - C\'est moins !')
-# print('Trouvé en %d coups !' % i)

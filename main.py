@@ -43,7 +43,8 @@ mh = None
 
 @bot.command(pass_context=True)
 async def hello(ctx):
-    bot.say('Hello ' + ctx.message.author.mention + ' !')
+    pass
+# await bot.say('Hello ' + ctx.message.author.mention + ' !')
 
 
 @bot.command(pass_context=True)
@@ -83,10 +84,6 @@ async def delete_image(img_name=None):
 @bot.command(pass_context=True)
 async def list_images(ctx):
     await bot.say('Deprecated command, go to https://tite.synedh.fr instead.')
-    # msgs = images.get_list(session)
-    # for msg in msgs:
-    #     await bot.send_message(ctx.message.author, '```' + msg + '```')
-    # await bot.say('Sent list in private message.')
 
 
 @bot.command(pass_context=True)
@@ -204,7 +201,7 @@ async def stats(ctx, arg1: str=''):
     elif arg1[1] == '#':
         await bot.say(stats_command.channel_stats(session, ctx.message.server, arg1))
     else:
-        await bot.say('Invalid given value %s. Please tag a channel or a user.' % args[0])
+        await bot.say('Invalid given value %s. Please tag a channel or a user.' % args1)
 
 
 @bot.event
