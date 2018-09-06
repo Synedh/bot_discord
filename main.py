@@ -43,8 +43,7 @@ mh = None
 
 @bot.command(pass_context=True)
 async def hello(ctx):
-    pass
-# await bot.say('Hello ' + ctx.message.author.mention + ' !')
+    await bot.say('Hello ' + ctx.message.author.mention + ' !')
 
 
 @bot.command(pass_context=True)
