@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 import model
-from bot import images, stats
+from bot import images
+from bot import stats as stats_command
 from bot.hangman import Hangman
 from bot.moreorless import MoreOrLess
 
@@ -197,18 +198,18 @@ async def pendu(*args: str):
 @bot.command(pass_context=True)
 async def stats(ctx, arg1: str=''):
     if arg1 == '':
-        await bot.say(stats.week_stats(session, ctx.message.server))
+        await bot.say(stats_command.week_stats(session, ctx.message.server))
     elif arg1[1] == '@':
-        await bot.say(stats.user_stats(session, ctx.message.server, arg1))
-    elif arg1[1] == '#'
-        await bot.say(stats.channel_stats(session, ctx.message.server, arg1))
+        await bot.say(stats_command.user_stats(session, ctx.message.server, arg1))
+    elif arg1[1] == '#':
+        await bot.say(stats_command.channel_stats(session, ctx.message.server, arg1))
     else:
         await bot.say('Invalid given value %s. Please tag a channel or a user.' % args[0])
 
 
 @bot.event
 async def on_message(message):
-    stats.add_entry(session, message)
+    stats_command.add_entry(session, message)
     if len(message.content) > 0 and message.content.split()[0][1:] in command_list:
         with open(dir_path + '/log/commands.log', "a+") as file:
             file.write('{0};{1};{2};{3};{4}\n'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), message.server, message.channel, message.author, message.content))

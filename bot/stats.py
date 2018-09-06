@@ -31,6 +31,8 @@ def week_stats(session, server):
         model.Message.server == str(server)
     ).filter(
         model.Message.date >= last_week
+    ).filter(
+        model.Message.channel != '433665712247144463'
     )
 
     for message in query:
@@ -67,12 +69,16 @@ def user_stats(session, server, user_id):
             model.Message.server == str(server)
         ).filter(
             model.Message.user_id == int(user_id[2:-1])
+        ).filter(
+            model.Message.channel != '433665712247144463'
         )
     except ValueError as e:
         query = session.query(model.Message).filter(
             model.Message.server == str(server)
         ).filter(
             model.Message.user.username == user_id[1:]
+        ).filter(
+            model.Message.channel != '433665712247144463'
         )
         if query.count > 0:
             user_id = '<@' + query.first().user_id + '>'
@@ -108,15 +114,17 @@ def channel_stats(session, server, channel):
         model.Message.server == str(server)
     ).filter(
         model.Message.channel == channel[2:-1]
+    ).filter(
+        model.Message.channel != '433665712247144463'
     )
 
     for message in query:
         date = message.date.strftime('%W-%Y')
         if date == datetime.now().strftime('%W-%Y'):
-            if message.channel not in channel_stats.keys():
-                date_stats[message.user_id] = 1
+            if message.user_id not in user_stats.keys():
+                user_stats[message.user_id] = 1
             else:
-                date_stats[message.user_id] += 1
+                user_stats[message.user_id] += 1
         if date not in date_stats.keys():
             date_stats[date] = 1
         else:
