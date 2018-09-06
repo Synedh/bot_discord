@@ -34,8 +34,7 @@ command_list = [
     'quote',
     'roll',
     'pick',
-    'week_stats',
-    'user_stats'
+    'stats'
 ]
 mol = None
 mh = None
@@ -196,11 +195,15 @@ async def pendu(*args: str):
         await bot.say('Invalid given value %s : do you want to start a new game ?' % args[0])
 
 @bot.command(pass_context=True)
-async def week_stats(ctx, user: str=''):
-    if user == '':
+async def stats(ctx, arg1: str=''):
+    if arg1 == '':
         await bot.say(stats.week_stats(session, ctx.message.server))
+    elif arg1[1] == '@':
+        await bot.say(stats.user_stats(session, ctx.message.server, arg1))
+    elif arg1[1] == '#'
+        await bot.say(stats.channel_stats(session, ctx.message.server, arg1))
     else:
-        await bot.say(stats.user_stats(session, ctx.message.server, user))
+        await bot.say('Invalid given value %s. Please tag a channel or a user.' % args[0])
 
 
 @bot.event

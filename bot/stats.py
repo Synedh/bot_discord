@@ -28,14 +28,16 @@ def week_stats(session, server):
     user_stats = {}
     channel_stats = {}
     query = session.query(model.Message).filter(
-        model.Message.server == str(server) and model.Message.date >= last_week
+        model.Message.server == str(server)
+    ).filter(
+        model.Message.date >= last_week
     )
 
     for message in query:
         if message.user.id not in user_stats.keys():
-            user_stats[message.user.id] = 1
+            user_stats[message.user_id] = 1
         else:
-            user_stats[message.user.id] += 1
+            user_stats[message.user_id] += 1
         if message.channel not in channel_stats.keys():
             channel_stats[message.channel] = 1
         else:
@@ -87,7 +89,6 @@ def user_stats(session, server, user_id):
             date_stats[date] += 1
 
     ordered_channel_stats = sorted(list(channel_stats.items()), key=lambda v: -v[1])
-
     channel_detail = '\n'.join(['- <#%s> : %d' % stats for stats in ordered_channel_stats[:5]])
     date_detail = '\n'.join([' - Semaine %s : %d' % (stats[0].split('-')[0], stats[1]) for stats in list(date_stats.items())[-5:]])
 
@@ -96,4 +97,38 @@ def user_stats(session, server, user_id):
         + 'Canaux favoris :\n%s\n\n'
         + 'Historique des dernières semaines :\n%s')
         % (user_id, sum(channel_stats.values()), channel_detail, date_detail)
+    )
+
+def channel_stats(session, server, channel):
+    last_week = datetime.now() - timedelta(days=7)
+    date_stats = {}
+    user_stats = {}
+
+    query = session.query(model.Message).filter(
+        model.Message.server == str(server)
+    ).filter(
+        model.Message.channel == channel[2:-1]
+    )
+
+    for message in query:
+        date = message.date.strftime('%W-%Y')
+        if date == datetime.now().strftime('%W-%Y'):
+            if message.channel not in channel_stats.keys():
+                date_stats[message.user_id] = 1
+            else:
+                date_stats[message.user_id] += 1
+        if date not in date_stats.keys():
+            date_stats[date] = 1
+        else:
+            date_stats[date] += 1
+
+    ordered_user_stats = sorted(list(user_stats.items()), key=lambda v: -v[1])
+    user_detail = '\n'.join(['- <@%s> : %d' % stats for stats in ordered_user_stats[:10]])
+    date_detail = '\n'.join([' - Semaine %s : %d' % (stats[0].split('-')[0], stats[1]) for stats in list(date_stats.items())[-5:]])
+
+    return ((
+        '%d messages ont étés postés les 7 derniers jours dans %s\n\n'
+        + 'Les plus gros posteurs des 7 derniers jours :\n%s\n\n'
+        + 'Historique des dernières semaines :\n%s')
+        % (sum(user_stats.values()), channel, user_detail, date_detail)
     )
