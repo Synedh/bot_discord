@@ -13,6 +13,7 @@ from bot import images
 from bot import stats as stats_command
 from bot.hangman import Hangman
 from bot.moreorless import MoreOrLess
+# from bot.background_tasks import stats_background
 
 token = None
 with open('token') as file:
@@ -181,6 +182,7 @@ async def pendu(*args: str):
         elif status == 2:
             await bot.say(hm.print_stats())
             await bot.say(hm.defeat_message)
+            await bot.say(hm.solution_message)
             await bot.say(hm.close_message)
             hm = None
         elif status == 3:
@@ -204,11 +206,14 @@ async def stats(ctx, arg1: str=''):
 
 
 @bot.event
-async def on_message(message):
+async def on_message(message):      
     stats_command.add_entry(session, message)
     if len(message.content) > 0 and message.content.split()[0][1:] in command_list:
         with open(dir_path + '/log/commands.log', "a+") as file:
-            file.write('{0};{1};{2};{3};{4}\n'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), message.server, message.channel, message.author, message.content))
+            file.write(
+                '{0};{1};{2};{3};{4}\n'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                message.server, message.channel, message.author, message.content)
+            )
         await bot.process_commands(message)
 
 
@@ -217,4 +222,5 @@ async def on_ready():
     print('Logged in as ' + bot.user.name + ' with id : ' + str(bot.user.id))
     print('------')
 
+# bot.loop.create_task(stats_background(bot))
 bot.run(token)

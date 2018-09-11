@@ -4,12 +4,18 @@ import model
 
 
 def add_entry(session, message):
-    queryuser = session.query(model.User).filter(model.User.username == str(message.author)).all()
-    if len(queryuser) == 0:
-        user = model.User(id=message.author.id, username=str(message.author), isInTite=False, hasEnougthRank=False)
+    queryuser = session.query(model.User)
+        .filter(model.User.username == str(message.author))
+    if queryuser.count() == 0:
+        user = model.User(
+            id = message.author.id,
+            username = str(message.author),
+            isInTite = (str(message.channel.id) == '202909295526805505'),
+            hasEnougthRank = False
+        )
         session.add(user)
     else:
-        user = queryuser[0]
+        user = queryuser.first()
 
     session.add(model.Message(
         text=message.content,
@@ -19,7 +25,6 @@ def add_entry(session, message):
         user=user,
         date=message.timestamp
     ))
-
     session.commit()
 
 
@@ -27,23 +32,14 @@ def week_stats(session, server):
     last_week = datetime.now() - timedelta(days=7)
     user_stats = {}
     channel_stats = {}
-    query = session.query(model.Message).filter(
-        model.Message.server == str(server)
-    ).filter(
-        model.Message.date >= last_week
-    ).filter(
-        model.Message.channel != '433665712247144463'
-    )
+    query = session.query(model.Message)
+        .filter(model.Message.server == str(server))
+        .filter(model.Message.date >= last_week)
+        .filter(model.Message.channel != '433665712247144463')
 
     for message in query:
-        if message.user.id not in user_stats.keys():
-            user_stats[message.user_id] = 1
-        else:
-            user_stats[message.user_id] += 1
-        if message.channel not in channel_stats.keys():
-            channel_stats[message.channel] = 1
-        else:
-            channel_stats[message.channel] += 1
+        user_stats[message.user_id] = user_stats.get(message.user_id, 0) + 1
+        channel_stats[message.channel] = channel_stats.get(message.channel, 0) + 1
 
     ordered_user_stats = sorted(list(user_stats.items()), key=lambda v: -v[1])
     ordered_channel_stats = sorted(list(channel_stats.items()), key=lambda v: -v[1])
@@ -65,34 +61,23 @@ def user_stats(session, server, user_id):
 
 
     try:
-        query = session.query(model.Message).filter(
-            model.Message.server == str(server)
-        ).filter(
-            model.Message.user_id == int(user_id[2:-1])
-        ).filter(
-            model.Message.channel != '433665712247144463'
-        )
+        query = session.query(model.Message)
+            .filter(model.Message.server == str(server))
+            .filter(model.Message.user_id == int(user_id[2:-1]))
+            .filter(model.Message.channel != '433665712247144463')
     except ValueError as e:
-        query = session.query(model.Message).filter(
-            model.Message.server == str(server)
-        ).filter(
-            model.Message.user.username == user_id[1:]
-        ).filter(
-            model.Message.channel != '433665712247144463'
-        )
+        query = session.query(model.Message)
+            .filter(model.Message.server == str(server))
+            .filter(model.Message.user.username == user_id[1:])
+            .filter(model.Message.channel != '433665712247144463')
         if query.count > 0:
             user_id = '<@' + query.first().user_id + '>'
+
     for message in query:
         date = message.date.strftime('%W-%Y')
         if date == datetime.now().strftime('%W-%Y'):
-            if message.channel not in channel_stats.keys():
-                channel_stats[message.channel] = 1
-            else:
-                channel_stats[message.channel] += 1
-        if date not in date_stats.keys():
-            date_stats[date] = 1
-        else:
-            date_stats[date] += 1
+            channel_stats[message.channel] = channel_stats.get(message.channel, 0) + 1
+        date_stats[date] = date_stats.get(date, 0) + 1
 
     ordered_channel_stats = sorted(list(channel_stats.items()), key=lambda v: -v[1])
     channel_detail = '\n'.join(['- <#%s> : %d' % stats for stats in ordered_channel_stats[:5]])
@@ -110,25 +95,16 @@ def channel_stats(session, server, channel):
     date_stats = {}
     user_stats = {}
 
-    query = session.query(model.Message).filter(
-        model.Message.server == str(server)
-    ).filter(
-        model.Message.channel == channel[2:-1]
-    ).filter(
-        model.Message.channel != '433665712247144463'
-    )
+    query = session.query(model.Message)
+        .filter(model.Message.server == str(server))
+        .filter(model.Message.channel == channel[2:-1])
+        .filter(model.Message.channel != '433665712247144463')
 
     for message in query:
         date = message.date.strftime('%W-%Y')
         if date == datetime.now().strftime('%W-%Y'):
-            if message.user_id not in user_stats.keys():
-                user_stats[message.user_id] = 1
-            else:
-                user_stats[message.user_id] += 1
-        if date not in date_stats.keys():
-            date_stats[date] = 1
-        else:
-            date_stats[date] += 1
+            user_stats[message.user_id] = user_stats.get(message.user_id, 0) + 1
+        date_stats[date] = date_stats.get(date, 0) + 1
 
     ordered_user_stats = sorted(list(user_stats.items()), key=lambda v: -v[1])
     user_detail = '\n'.join(['- <@%s> : %d' % stats for stats in ordered_user_stats[:10]])

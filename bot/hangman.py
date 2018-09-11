@@ -24,6 +24,7 @@ class Hangman:
         self.triedchars = []
         self.turn_message = 'Entrez un mot ou une lettre.'
         self.victory_message = 'Félicitation, vous avez trouvé le mot !'
+        self.solution_message = 'Le mot était %s.' % self.word
         self.defeat_message = 'Dommage, vous êtes pendu !'
         self.close_message = 'Closing game.'
 
