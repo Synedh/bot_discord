@@ -1,6 +1,8 @@
 import os
+import re
 import random
 import discord
+import requests
 from discord.ext.commands import Bot
 from discord.errors import HTTPException, NotFound
 from discord.ext.commands.errors import CommandNotFound
@@ -36,7 +38,8 @@ command_list = [
     'quote',
     'roll',
     'pick',
-    'stats'
+    'stats',
+    'yt'
 ]
 mol = None
 mh = None
@@ -131,6 +134,18 @@ async def pick(*choices: str):
         await bot.say('Picked ' + random.choice(choices) + '.')
     else:
         await bot.say('No value to pick !')
+
+
+@bot.command()
+async def yt(*args: str):
+    if len(args) > 0:
+        await bot.say((
+            'https://youtube.com%s' 
+            % (re.search(r'href=\"(/watch\?v=.*?)\"',
+            requests.get('https://www.youtube.com/results?search_query=%s' % '+'.join(args)).text)[1])
+        ))
+    else:
+        await bot.say('No keyword to search')
 
 
 @bot.command()
