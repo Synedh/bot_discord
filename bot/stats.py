@@ -4,8 +4,8 @@ import model
 
 
 def add_entry(session, message):
-    queryuser = session.query(model.User)
-        .filter(model.User.username == str(message.author))
+    queryuser = (session.query(model.User)
+        .filter(model.User.username == str(message.author)))
     if queryuser.count() == 0:
         user = model.User(
             id = message.author.id,
@@ -32,10 +32,10 @@ def week_stats(session, server):
     last_week = datetime.now() - timedelta(days=7)
     user_stats = {}
     channel_stats = {}
-    query = session.query(model.Message)
+    query = (session.query(model.Message)
         .filter(model.Message.server == str(server))
         .filter(model.Message.date >= last_week)
-        .filter(model.Message.channel != '433665712247144463')
+        .filter(model.Message.channel != '433665712247144463'))
 
     for message in query:
         user_stats[message.user_id] = user_stats.get(message.user_id, 0) + 1
@@ -61,15 +61,15 @@ def user_stats(session, server, user_id):
 
 
     try:
-        query = session.query(model.Message)
+        query = (session.query(model.Message)
             .filter(model.Message.server == str(server))
             .filter(model.Message.user_id == int(user_id[2:-1]))
-            .filter(model.Message.channel != '433665712247144463')
+            .filter(model.Message.channel != '433665712247144463'))
     except ValueError as e:
-        query = session.query(model.Message)
+        query = (session.query(model.Message)
             .filter(model.Message.server == str(server))
             .filter(model.Message.user.username == user_id[1:])
-            .filter(model.Message.channel != '433665712247144463')
+            .filter(model.Message.channel != '433665712247144463'))
         if query.count > 0:
             user_id = '<@' + query.first().user_id + '>'
 
@@ -95,10 +95,10 @@ def channel_stats(session, server, channel):
     date_stats = {}
     user_stats = {}
 
-    query = session.query(model.Message)
+    query = (session.query(model.Message)
         .filter(model.Message.server == str(server))
         .filter(model.Message.channel == channel[2:-1])
-        .filter(model.Message.channel != '433665712247144463')
+        .filter(model.Message.channel != '433665712247144463'))
 
     for message in query:
         date = message.date.strftime('%W-%Y')
