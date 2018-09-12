@@ -29,6 +29,7 @@ model.Base.metadata.create_all(engine)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 command_list = [
     'hello',
+    'help',
     'save_image',
     'image',
     'delete_image',
@@ -47,11 +48,13 @@ mh = None
 
 @bot.command(pass_context=True)
 async def hello(ctx):
+    """Answer Hello to command sender."""
     await bot.say('Hello ' + ctx.message.author.mention + ' !')
 
 
 @bot.command(pass_context=True)
 async def save_image(ctx, img_name=None):
+    """Save an image in bot database."""
     if img_name == None:
         await bot.say('No given name.')
     else:
@@ -64,6 +67,7 @@ async def save_image(ctx, img_name=None):
 
 @bot.command(pass_context=True)
 async def image(ctx, img_name=None):
+    """Print image of given name."""
     if img_name == None:
         await bot.say('No given name.')
     else:
@@ -78,6 +82,7 @@ async def image(ctx, img_name=None):
 
 @bot.command()
 async def delete_image(img_name=None):
+    """Delete image of given name."""
     if img_name == None:
         await bot.say('No given name.')
     else:
@@ -86,11 +91,13 @@ async def delete_image(img_name=None):
 
 @bot.command(pass_context=True)
 async def list_images(ctx):
+    """Deprecated command, go to https://tite.synedh.fr instead."""
     await bot.say('Deprecated command, go to https://tite.synedh.fr instead.')
 
 
 @bot.command(pass_context=True)
 async def quote(ctx, msg_id=None, channel=None):
+    """Quote message of given id. Specify channel if not current."""
     if not msg_id:
         await bot.say('No given message id.')
     elif channel:
@@ -111,14 +118,15 @@ async def quote(ctx, msg_id=None, channel=None):
 
 
 @bot.command()
-async def roll(arg1=None, arg2=None):
+async def roll(qty=None, dice=None):
+    """Roll some dices."""
     try:
-        if arg1 == None:
+        if qty == None:
             await bot.say('Nothing to roll !')
-        elif arg2 == None:
-            await bot.say('Rolled ' + str(random.randint(1, int(arg1))) + '.')
-        elif int(arg1) < 2000:
-            values = [random.randint(1, int(arg2)) for i in range(0, int(arg1))]
+        elif dice == None:
+            await bot.say('Rolled ' + str(random.randint(1, int(qty))) + '.')
+        elif int(qty) < 2000:
+            values = [random.randint(1, int(dice)) for i in range(0, int(qty))]
             await bot.say('Rolled ' + ', '.join([str(value) for value in values]) + '.\nTotal value : ' + str(sum(values)) + '.')
         else:
             await bot.say('Too many dices to roll !')
@@ -130,6 +138,7 @@ async def roll(arg1=None, arg2=None):
 
 @bot.command()
 async def pick(*choices: str):
+    """Sometimes important choices depend on a simple bot."""
     if len(choices) > 0:
         await bot.say('Picked ' + random.choice(choices) + '.')
     else:
@@ -137,30 +146,32 @@ async def pick(*choices: str):
 
 
 @bot.command()
-async def yt(*args: str):
-    if len(args) > 0:
+async def yt(*keywords: str):
+    """Send first result of youtube research with given keywords."""
+    if len(keywords) > 0:
         await bot.say((
             'https://youtube.com%s' 
             % (re.search(r'href=\"(/watch\?v=.*?)\"',
-            requests.get('https://www.youtube.com/results?search_query=%s' % '+'.join(args)).text)[1])
+            requests.get('https://www.youtube.com/results?search_query=%s' % '+'.join(keywords)).text)[1])
         ))
     else:
         await bot.say('No keyword to search')
 
 
 @bot.command()
-async def more_or_less(*args: str):
+async def more_or_less(command: str):
+    """Start a new More or Less game with !more_or_less start"""
     global mol
-    if args[0] == 'start':
+    if command == 'start':
         mol = MoreOrLess()
         await bot.say('Started new More or Less game.')
         await bot.say(mol.message1())
-    elif mol and args[0] == 'stop':
+    elif mol and command == 'stop':
         await bot.say(mol.message3())
         mol = None
     else:
         try:
-            status, message = mol.entry(int(args[0]))
+            status, message = mol.entry(int(command))
             await bot.say(message)
             if status == 1:
                 await bot.say(mol.message1())
@@ -170,24 +181,25 @@ async def more_or_less(*args: str):
                 await bot.say(mol.message3())
                 mol = None
         except ValueError as e:
-            await bot.say('Invalid given value %s : must be an integer.' % args[0])
+            await bot.say('Invalid given value %s : must be an integer.' % command)
         except AttributeError as e:
             await bot.say('Not any game started. Type "!more_or_less start" to start new game.'
 )
 
 @bot.command()
-async def pendu(*args: str):
+async def pendu(command: str):
+    """Start a new hangman with !pendu start (fr only)."""
     global hm
-    if args[0] == 'start':
+    if command == 'start':
         hm = Hangman()
         await bot.say('Démarré nouveau pendu.')
         await bot.say(hm.print_stats())
         await bot.say(hm.turn_message)
-    elif hm and args[0] == 'stop':
+    elif hm and command == 'stop':
         await bot.say(hm.close_message)
         hm = None
     elif hm:
-        status, message = hm.try_value(args[0].upper())
+        status, message = hm.try_value(command.upper())
         await bot.say(message)
         if status == 0:
             await bot.say(hm.turn_message)
@@ -206,18 +218,19 @@ async def pendu(*args: str):
             await bot.say(hm.close_message)
             hm = None
     else:
-        await bot.say('Invalid given value %s : do you want to start a new game ?' % args[0])
+        await bot.say('Invalid given value %s : do you want to start a new game ?' % command)
 
 @bot.command(pass_context=True)
-async def stats(ctx, arg1: str=''):
-    if arg1 == '':
+async def stats(ctx, detail: str=''):
+    """Get stats of given server. Use @user or #channel for details."""
+    if detail == '':
         await bot.say(stats_command.week_stats(session, ctx.message.server))
-    elif arg1[1] == '@':
-        await bot.say(stats_command.user_stats(session, ctx.message.server, arg1))
-    elif arg1[1] == '#':
-        await bot.say(stats_command.channel_stats(session, ctx.message.server, arg1))
+    elif detail[1] == '@':
+        await bot.say(stats_command.user_stats(session, ctx.message.server, detail))
+    elif detail[1] == '#':
+        await bot.say(stats_command.channel_stats(session, ctx.message.server, detail))
     else:
-        await bot.say('Invalid given value %s. Please tag a channel or a user.' % args1)
+        await bot.say('Invalid given value %s. Please tag a channel or a user.' % detail)
 
 
 @bot.event
