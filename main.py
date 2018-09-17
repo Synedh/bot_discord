@@ -100,6 +100,7 @@ async def quote(ctx, msg_id=None, channel=None):
     """Quote message of given id. Specify channel if not current."""
     if not msg_id:
         await bot.say('No given message id.')
+        return
     elif channel:
         quote_channel = discord.utils.find(lambda c: c.name == channel, ctx.message.server.channels)
         if not quote_channel:
