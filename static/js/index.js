@@ -79,7 +79,6 @@ var $cells = $(".filter");
 
 $("#search").keyup(function() {
     var val = $.trim(this.value).toUpperCase();
-    console.log(val);
     if (val === "")
         $cells.parent().show();
     else {
@@ -244,8 +243,8 @@ window.onload = function() {
     }
 }
 
-window.onkeydown = function() {
-    if (!modal_open) {
+window.onkeydown = function(e) {
+    if (!modal_open && e.key.length == 1) {
         document.getElementById("search").focus();
     }
 }
