@@ -34,7 +34,7 @@ command_list = [
     'image',
     'delete_image',
     'list_images',
-    'more_or_less',
+    'moreorless',
     'pendu',
     'quote',
     'roll',
@@ -160,31 +160,29 @@ async def yt(*keywords: str):
 
 
 @bot.command()
-async def more_or_less(command: str):
-    """Start a new More or Less game with !more_or_less start"""
+async def moreorless(command: str):
+    """Start a new More or Less game with !moreorless start"""
     global mol
     if command == 'start':
         mol = MoreOrLess()
-        await bot.say('Started new More or Less game.')
-        await bot.say(mol.message1())
+        await bot.say('Started new More or Less game.\n' + mol.select_message)
     elif mol and command == 'stop':
-        await bot.say(mol.message3())
+        await bot.say(close_message)
         mol = None
     else:
         try:
             status, message = mol.entry(int(command))
-            await bot.say(message)
             if status == 1:
-                await bot.say(mol.message1())
+                await bot.say(message + '\n' + mol.select_message)
             elif status == 2:
-                await bot.say(mol.message2())
+                await bot.say(message + '\n' + mol.message2())
             elif status == 3:
-                await bot.say(mol.message3())
+                await bot.say(message + '\n' + mol.close_message)
                 mol = None
         except ValueError as e:
             await bot.say('Invalid given value %s : must be an integer.' % command)
         except AttributeError as e:
-            await bot.say('Not any game started. Type "!more_or_less start" to start new game.'
+            await bot.say('Not any game started. Type "!moreorless start" to start new game.'
 )
 
 @bot.command()

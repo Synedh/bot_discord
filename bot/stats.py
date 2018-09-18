@@ -79,9 +79,10 @@ def user_stats(session, server, user_id):
         date = message.date.strftime('%W-%Y')
         date_stats[date] = date_stats.get(date, 0) + 1
 
-    ordered_channel_stats = sorted(list(channel_stats.items()), key=lambda v: -v[1])
-    channel_detail = '\n'.join(['- <#%s> : %d' % stats for stats in ordered_channel_stats[:5]])
-    date_detail = '\n'.join([' - Semaine %s : %d' % (stats[0].split('-')[0], stats[1]) for stats in reversed(list(date_stats.items())[-5:])])
+    ordered_channel_stats = sorted(list(channel_stats.items()), key=lambda v: -v[1])[:5]
+    ordered_date_stats = [(stats[0].split('-')[0], stats[1]) for stats in reversed(list(date_stats.items())[-5:])]
+    channel_detail = '\n'.join(['- <#%s> : %d' % stats for stats in ordered_channel_stats])
+    date_detail = '\n'.join([' - Semaine %s : %d' % stats for stats in ordered_date_stats])
 
     return ((
         '%s a posté %d messages les 7 derniers jours.\n\n'
@@ -105,9 +106,10 @@ def channel_stats(session, server, channel):
         date = message.date.strftime('%W-%Y')
         date_stats[date] = date_stats.get(date, 0) + 1
 
-    ordered_user_stats = sorted(list(user_stats.items()), key=lambda v: -v[1])
-    user_detail = '\n'.join(['- <@%s> : %d' % stats for stats in ordered_user_stats[:10]])
-    date_detail = '\n'.join([' - Semaine %s : %d' % (stats[0].split('-')[0], stats[1]) for stats in reversed(list(date_stats.items())[-5:])])
+    ordered_user_stats = sorted(list(user_stats.items()), key=lambda v: -v[1])[:10]
+    ordered_date_stats = [(stats[0].split('-')[0], stats[1]) for stats in reversed(list(date_stats.items())[-5:])]
+    user_detail = '\n'.join(['- <@%s> : %d' % stats for stats in ordered_user_stats])
+    date_detail = '\n'.join([' - Semaine %s : %d' % stats for stats in ordered_date_stats])
 
     return ((
         '%d messages ont étés postés les 7 derniers jours dans %s\n\n'

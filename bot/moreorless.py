@@ -7,6 +7,8 @@ class MoreOrLess:
         self.max_value = 0
         self.correct_value = 0
         self.selected_value = 0
+        self.select_message = 'Please select a maximum value.'
+        self.close_message = 'Closing game.'
 
     def message1(self):
         return 'Please select a maximum value.'
