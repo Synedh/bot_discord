@@ -200,21 +200,7 @@ async def pendu(command: str):
     elif hm:
         status, message = hm.try_value(command.upper())
         await bot.say(message)
-        if status == 0:
-            await bot.say(hm.turn_message)
         elif status == 1:
-            await bot.say(hm.print_stats())
-            await bot.say(hm.turn_message)
-        elif status == 2:
-            await bot.say(hm.print_stats())
-            await bot.say(hm.defeat_message)
-            await bot.say(hm.solution_message)
-            await bot.say(hm.close_message)
-            hm = None
-        elif status == 3:
-            await bot.say(hm.print_stats())
-            await bot.say(hm.victory_message)
-            await bot.say(hm.close_message)
             hm = None
     else:
         await bot.say('Invalid given value %s : do you want to start a new game ?' % command)

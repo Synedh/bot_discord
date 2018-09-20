@@ -10,14 +10,8 @@ class MoreOrLess:
         self.select_message = 'Please select a maximum value.'
         self.close_message = 'Closing game.'
 
-    def message1(self):
-        return 'Please select a maximum value.'
-
     def message2(self):
         return 'Please pick a value between %d and %d.' % (self.min_value, self.max_value)
-
-    def message3(self):
-        return 'Closing game.'
 
     def entry(self, value: int):
         if self.max_value == 0:

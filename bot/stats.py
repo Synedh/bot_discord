@@ -23,7 +23,7 @@ def add_entry(session, message):
         channel=message.channel.id,
         user_id=user.id,
         user=user,
-        date=message.timestamp
+        date=datetime.now()
     ))
     session.commit()
 

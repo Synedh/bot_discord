@@ -24,8 +24,7 @@ class Hangman:
         self.triedchars = []
         self.turn_message = 'Entrez un mot ou une lettre.'
         self.victory_message = 'Félicitation, vous avez trouvé le mot !'
-        self.solution_message = 'Le mot était %s.' % self.word
-        self.defeat_message = 'Dommage, vous êtes pendu !'
+        self.defeat_message = 'Dommage, vous êtes pendu !\nLe mot était %s.' % self.word
         self.close_message = 'Closing game.'
 
     def print_stats(self):
@@ -39,9 +38,9 @@ class Hangman:
 
     def try_value(self, value):
         if len(value) != 1 and len(value) != len(self.word) or not value.isalpha():
-            return 0, 'Valeur incorrecte : ' + value + '.'
+            return 0, 'Valeur incorrecte : ' + value + '.\n' + self.turn_message 
         if value in self.triedchars:
-            return 0, value + ' a déjà été testée !'
+            return 0, value + ' a déjà été testée !\n' + self.turn_message
 
         result = False
         self.triedchars.append(value)
@@ -55,14 +54,14 @@ class Hangman:
                 self.foundword[tmp.index(value)] = value
                 tmp[tmp.index(value)] = '_'
 
-        if not result:
-            self.step += 1
-            if self.step == len(images) - 1:
-                return 2, value + ' n\'est pas dans le mot !'
-            else:
-                return 1, value + ' n\'est pas dans le mot !'
+        message = ''
+        if result:
+            message += value + ' n\'est pas dans le mot !\n' + self.print_stats()
         else:
-            if ''.join(self.foundword) == self.word:
-                return 3, value + ' est bon !'
-            else:
-                return 1, value + ' est bon !'
+            message += value + ' est bon !\n' + self.print_stats()
+        if self.step == len(images) - 1:
+            return 1, '%s\n%s\n%s' % (message, self.defeat_message, self.close_message)
+        elif ''.join(self.foundword) == self.word:
+            return 1, '%s\n%s\n%s' % (message, self.victory_message, self.close_message)
+        else:
+            return 0, message + '\n' + self.turn_message
