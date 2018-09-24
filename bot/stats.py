@@ -64,7 +64,7 @@ def user_stats(session, server, user_id):
     try:
         query = (session.query(model.Message)
             .filter(model.Message.server == str(server))
-            .filter(model.Message.user_id == int(re.search(r'([0-9]+)', user_id)))
+            .filter(model.Message.user_id == int(re.search(r'([0-9]+)', user_id)[0]))
             .filter(model.Message.channel != '433665712247144463'))
     except ValueError as e:
         query = (session.query(model.Message)
@@ -99,7 +99,7 @@ def channel_stats(session, server, channel):
 
     query = (session.query(model.Message)
         .filter(model.Message.server == str(server))
-        .filter(model.Message.channel == re.search(r'([0-9]+)', channel[2:-1])))
+        .filter(model.Message.channel == re.search(r'([0-9]+)', channel[2:-1])[0]))
 
     for message in query:
         if message.date > datetime.now() - timedelta(days=7):
