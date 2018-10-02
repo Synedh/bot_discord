@@ -45,19 +45,45 @@ def make_session(token=None, state=None, scope=None):
         token_updater=token_updater)
 
 
-def get_images(s):
-    return [image for image in s.query(model.Image).filter(model.Image.active)]
-
-
 def is_tite_in_guilds(guilds):
     for guild in guilds:
-        if guild['id'] == '202909295526805505':
-            return guild
+        try:
+            if guild['id'] == '202909295526805505':
+                return guild
+        except TypeError as e:
+            pass
     return False
 
 
 def has_permission(perm):
     return bool(perm & 0x10000000)
+
+
+def get_current_user(s):
+    discord_session = make_session(token=session.get('oauth2_token'))
+    user = discord_session.get(API_BASE_URL + '/users/@me').json()
+    guilds = discord_session.get(API_BASE_URL + '/users/@me/guilds').json()
+    if 'code' in user or type(guilds) == dict:
+        return None, None
+    queryuser = s.query(model.User).filter(model.User.id == user['id'])
+    if queryuser.count() == 0:
+        current_user = model.User(
+            id=user['id'], 
+            username=user['username'] + '#' + user['discriminator'], 
+            isInTite=bool(is_tite_in_guilds(guilds)), 
+            hasEnougthRank=has_permission(is_tite_in_guilds(guilds)['permissions'])
+        )
+        s.add(current_user)
+    else:
+        current_user = queryuser.first()
+        if current_user.username != (user['username'] + '#' + user['discriminator']):
+            current_user.username = user['username'] + '#' + user['discriminator']
+        if current_user.isInTite != bool(is_tite_in_guilds(guilds)):
+            current_user.isInTite = bool(is_tite_in_guilds(guilds))
+        if current_user.hasEnougthRank != has_permission(is_tite_in_guilds(guilds)['permissions']):
+            current_user.hasEnougthRank = has_permission(is_tite_in_guilds(guilds)['permissions'])
+    s.commit()
+    return current_user, user['avatar']
 
 
 @app.template_filter()
@@ -85,29 +111,19 @@ def fav_ordering(images, user):
 
 @app.route('/')
 def index():
-    discord = make_session(token=session.get('oauth2_token'))
-    user = discord.get(API_BASE_URL + '/users/@me').json()
-    guilds = discord.get(API_BASE_URL + '/users/@me/guilds').json()
-    s = Session(create_engine('sqlite:///account.db'))
-    if 'code' in user:
-        return render_template('index.html', images=get_images(s), user=None)
-    queryuser = s.query(model.User).filter(model.User.id == user['id'])
-    if queryuser.count() == 0:
-        s.add(model.User(
-            id=user['id'], 
-            username=user['username'] + '#' + user['discriminator'], 
-            isInTite=bool(is_tite_in_guilds(guilds)), 
-            hasEnougthRank=has_permission(is_tite_in_guilds(guilds)['permissions'])
-        ))
-    else:
-        if queryuser.first().username != (user['username'] + '#' + user['discriminator']):
-            queryuser.first().username = user['username'] + '#' + user['discriminator']
-        if queryuser.first().isInTite != bool(is_tite_in_guilds(guilds)):
-            queryuser.first().isInTite = bool(is_tite_in_guilds(guilds))
-        if queryuser.first().hasEnougthRank != has_permission(is_tite_in_guilds(guilds)['permissions']):
-            queryuser.first().hasEnougthRank = has_permission(is_tite_in_guilds(guilds)['permissions'])
-    s.commit()
-    return render_template('index.html', images=get_images(s), user=queryuser.first(), avatar=user['avatar'])
+    session = Session(create_engine('sqlite:///account.db'))
+    current_user, avatar = get_current_user(session)
+    images = [image for image in session.query(model.Image).filter(model.Image.active)]
+    return render_template('index.html', images=images, user=current_user, avatar=avatar)
+
+
+@app.route('/users')
+def users():
+    session = Session(create_engine('sqlite:///account.db'))
+    current_user, avatar = get_current_user(session)
+    users = []
+    return render_template('users.html', users=users, user=current_user, avatar=avatar)
+
 
 
 @app.route('/upload', methods=['POST'])
@@ -159,8 +175,8 @@ def connect():
     scope = request.args.get(
         'scope',
         'identify guilds')
-    discord = make_session(scope=scope.split(' '))
-    authorization_url, state = discord.authorization_url(AUTHORIZATION_BASE_URL)
+    discord_session = make_session(scope=scope.split(' '))
+    authorization_url, state = discord_session.authorization_url(AUTHORIZATION_BASE_URL)
     session['oauth2_state'] = state
     return redirect(authorization_url)
 
@@ -169,8 +185,8 @@ def connect():
 def callback():
     if request.values.get('error'):
         return request.values['error']
-    discord = make_session(state=session.get('oauth2_state'))
-    token = discord.fetch_token(
+    discord_session = make_session(state=session.get('oauth2_state'))
+    token = discord_session.fetch_token(
         TOKEN_URL,
         client_secret=OAUTH2_CLIENT_SECRET,
         authorization_response=request.url)

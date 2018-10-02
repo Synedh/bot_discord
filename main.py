@@ -1,5 +1,6 @@
 import os
 import re
+import shlex
 import random
 import discord
 import requests
@@ -157,6 +158,19 @@ async def yt(*keywords: str):
         ))
     else:
         await bot.say('No keyword to search')
+
+
+@bot.command()
+async def poll(poll_string: str):
+    """Create a new poll with given question and answers."""
+    try:
+        question = shlex.split(poll_string)[0]
+        answers = shlex.split(poll_string)[1:]
+        if len(answers) < 2:
+            raise IndexError('Not enough answers.')
+    except IndexError as e:
+        await bot.say('I need a question and at least two answers to start a poll !')
+    await bot.say(question + '\n' + '\n'.join(answers))
 
 
 @bot.command()

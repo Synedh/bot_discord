@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+        {% block title %}Utilisateurs en ligne{% endblock %}
+        {% block content %}
+        <a href="{{ url_for('index') }}"><h1>Visu discord ThiS is ThE EnD</h1></a>
+
+        <div class="content-wrapper">
+            {% for user in conneted_users %}
+            <div class="user">
+                <img src="{{ user.icon }}" alt="user icon">
+                <span class="user_username" style="color: {{ user.color }}">{{ user.username }}</span>
+                {% if user.game != "" %}
+                <span class="user_game">Joue à {{ user.game }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endblock %}
