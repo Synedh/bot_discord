@@ -6,7 +6,7 @@ import discord
 import requests
 from discord.ext.commands import Bot
 from discord.errors import HTTPException, NotFound
-from discord.ext.commands.errors import CommandNotFound
+from discord.ext.commands.errors import CommandNotFound, BadArgument
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -22,7 +22,7 @@ token = None
 with open('token') as file:
     token = file.readline()[:-1].split('=')[1]
 
-bot = Bot(command_prefix=("!"))
+bot = Bot(command_prefix=("!"), pm_help=True)
 engine = create_engine('sqlite:///account.db')
 session = Session(engine)
 model.Base.metadata.create_all(engine)
@@ -243,7 +243,10 @@ async def on_message(message):
                 '{0};{1};{2};{3};{4}\n'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 message.server, message.channel, message.author, message.content)
             )
-        await bot.process_commands(message)
+        try:
+            await bot.process_commands(message)
+        except BadArgument as e: 
+            await bot.say(e)
 
 
 @bot.event
@@ -251,5 +254,4 @@ async def on_ready():
     print('Logged in as ' + bot.user.name + ' with id : ' + str(bot.user.id))
     print('------')
 
-# bot.loop.create_task(stats_background(bot))
 bot.run(token)
