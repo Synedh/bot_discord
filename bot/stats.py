@@ -6,7 +6,7 @@ import model
 
 def add_entry(session, message):
     queryuser = (session.query(model.User)
-        .filter(model.User.username == str(message.author)))
+        .filter(model.User.id == message.author.id))
     if queryuser.count() == 0:
         user = model.User(
             id = message.author.id,
@@ -17,6 +17,8 @@ def add_entry(session, message):
         session.add(user)
     else:
         user = queryuser.first()
+        if user.username != message.author:
+            user.username == str(message.author)
 
     session.add(model.Message(
         text=message.content,
