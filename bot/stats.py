@@ -18,7 +18,7 @@ def add_entry(session, message):
     else:
         user = queryuser.first()
         if user.username != message.author:
-            user.username == str(message.author)
+            user.username = str(message.author)
 
     session.add(model.Message(
         text=message.content,

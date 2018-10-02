@@ -41,7 +41,8 @@ command_list = [
     'roll',
     'pick',
     'stats',
-    'yt'
+    'yt',
+    'poll'
 ]
 mol = None
 mh = None
@@ -160,17 +161,18 @@ async def yt(*keywords: str):
         await bot.say('No keyword to search')
 
 
-@bot.command()
-async def poll(poll_string: str):
+@bot.command(pass_context=True)
+async def poll(ctx, question: str, *answers: str):
     """Create a new poll with given question and answers."""
-    try:
-        question = shlex.split(poll_string)[0]
-        answers = shlex.split(poll_string)[1:]
-        if len(answers) < 2:
-            raise IndexError('Not enough answers.')
-    except IndexError as e:
-        await bot.say('I need a question and at least two answers to start a poll !')
-    await bot.say(question + '\n' + '\n'.join(answers))
+    emotes = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣', '🔟']
+    if len(answers) < 2:
+        await bot.say('I need at least two answers to start a poll !')
+    elif len(answers) > 10:
+        await bot.say('I can\'t start a poll with that much options !')
+    else:
+        message = await bot.say('**Nouveau sondage !\n%s**\n' % question + '\n'.join(['%s %s' % (emotes[i], answer) for i, answer in enumerate(answers)]))
+        for i in range(0, len(answers)):
+            await bot.add_reaction(message, emotes[i])
 
 
 @bot.command()
