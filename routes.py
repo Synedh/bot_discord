@@ -2,7 +2,8 @@ import model
 from bot import images
 
 import os
-from datetime import datetime
+import json
+from datetime import datetime, timedelta
 from requests_oauthlib import OAuth2Session
 from flask import Flask, render_template, session, request, url_for, redirect, _request_ctx_stack, jsonify
 from sqlalchemy import create_engine
@@ -117,6 +118,27 @@ def index():
     return render_template('index.html', images=images, user=current_user, avatar=avatar)
 
 
+@app.route('/stats')
+def stats():
+    session = Session(create_engine('sqlite:///account.db'))
+    current_user, avatar = get_current_user(session)
+    stats = {}
+    for message in session.query(model.Message).filter(model.Message.date >= datetime.now() - timedelta(days=365)):
+        if message.user_id != 275988520093614091:
+            username = message.user.username.replace('\'', '')
+            date = message.date.strftime('%m-%Y')
+            if username not in stats:
+                stats[username] = {}
+            stats[username][date] = stats[username].get(date, 0) + 1
+    keys = []
+    new_stats = {'data': []}
+    for key, value in stats.items():
+        keys += value.keys()
+        new_stats['data'].append({'label': key, 'content': value})
+    new_stats['labels'] = sorted(set(keys), key=lambda date: date.split('-')[1] + date.split('-')[0])
+    return render_template('stats.html', stats=json.dumps(new_stats), user=current_user, avatar=avatar)
+
+
 @app.route('/users')
 def users():
     session = Session(create_engine('sqlite:///account.db'))
@@ -133,8 +155,8 @@ def upload_image():
     image_url = request.json['image_url']
     s = Session(create_engine('sqlite:///account.db'))
     user = s.query(model.User).filter(model.User.id == user_id).first()
-    images.save_image(s, image_url, image_name, user.username)
-    return jsonify({'user_id': user.id, 'image_name': image_name, 'url': image_url})
+    return jsonify(images.save_image(s, image_url, image_name, user.username))
+    # return jsonify({'user_id': user.id, 'image_name': image_name, 'url': image_url})
 
 
 @app.route('/fav', methods=['POST'])

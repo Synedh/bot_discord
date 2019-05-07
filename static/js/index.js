@@ -199,6 +199,7 @@ function uploadImage(user_id) {
     var url = $("#upload_url").val();
     var image_name = $("#upload_name").val();
 
+
     if (validate_name() && validate_url() && image_loaded) {
         $.ajax({
             method: "POST",
@@ -206,9 +207,14 @@ function uploadImage(user_id) {
             contentType: "application/json;charset=UTF-8",
             data: JSON.stringify({"user_id": user_id, "image_name": image_name,"image_url": url}),
             success: function(data) {
-                sessionStorage.setItem("validUpload", image_name);
-                document.location.reload();
-            }
+                if (data['ok']) {
+                    sessionStorage.setItem("validUpload", image_name);
+                    document.location.reload();
+                }
+                else {
+                    display_alert("alert_danger", "Impossible de sauvegarder l'image : " + data['msg']);
+                }
+            },
         });
     }
 }

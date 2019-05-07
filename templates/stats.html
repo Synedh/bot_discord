@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+        {% block title %}Utilisateurs en ligne{% endblock %}
+        {% block content %}
+        <a href="{{ url_for('index') }}"><h1>Visu discord ThiS is ThE EnD</h1></a>
+
+        <div class="content-wrapper">
+            <canvas id="chart"></canvas>
+        </div>
+
+        <script>
+            window.appConfig = { stats: '{{ stats|safe }}' };
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+        <script src="{{ url_for('static', filename='js/stats.js') }}"></script>
+        {% endblock %}

@@ -113,9 +113,12 @@ async def quote(ctx, msg_id=None, channel=None):
     try:
         msg = await bot.get_message(quote_channel, msg_id)
     except (HTTPException, NotFound):
-        await bot.say('Message with id `' + msg_id + '` does not exists.')
+        await bot.say('Message with id `' + msg_id + '` does not exists in the given channel.')
         return
-    em = discord.Embed(description=msg.clean_content, colour=msg.author.roles[-1].color)
+    try:
+        em = discord.Embed(description=msg.clean_content, colour=msg.author.roles[-1].color)
+    except AttributeError as e:
+        em = discord.Embed(description=msg.clean_content)
     em.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
     await bot.say(msg.author.mention, embed=em)
 

@@ -41,9 +41,9 @@ def week_stats(session, server):
         .filter(model.Message.channel != '433665712247144463'))
 
     for message in query:
-        user_stats[message.user_id] = user_stats.get(message.user_id, 0) + 1
-        channel_stats[message.channel] = channel_stats.get(message.channel, 0) + 1
-
+        if message.user_id != 275988520093614091:
+            user_stats[message.user_id] = user_stats.get(message.user_id, 0) + 1
+            channel_stats[message.channel] = channel_stats.get(message.channel, 0) + 1
     ordered_user_stats = sorted(list(user_stats.items()), key=lambda v: -v[1])
     ordered_channel_stats = sorted(list(channel_stats.items()), key=lambda v: -v[1])
     user_detail = '\n'.join(['- <@%s> : %d' % stats for stats in ordered_user_stats[:10]])

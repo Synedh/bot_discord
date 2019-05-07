@@ -10,7 +10,10 @@ images_folder = dir_path + '/images_stored/'
 
 
 def save_image(session, url, name, username):
-    response = requests.get(url, stream=True)
+    try:
+        response = requests.get(url, stream=True)
+    except requests.exceptions.SSLError as e:
+        return {'ok': False, 'msg': 'SSLError : certificate verify failed.'}
     if not response.ok:
         return {'ok': False, 'msg': 'Could not retrieve file.'}
     elif response.ok and 'image' not in response.headers['content-type']:
