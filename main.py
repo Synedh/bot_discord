@@ -11,7 +11,8 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 import model
-from bot import images, dnd
+from bot import images
+from bot import dnd as dnd_command
 from bot import stats as stats_command
 from bot.hangman import Hangman
 from bot.moreorless import MoreOrLess
@@ -180,8 +181,10 @@ async def poll(ctx, question: str, *answers: str):
 
 @bot.command()
 async def dnd(key:str, *value):
-    await bot.say(dnd.get_item_detail(key, value))
-
+    """Search some dnd data in french"""
+    if key == 'help':
+        await bot.say(f'Infos possibles : {", ".join(dnd_command.endpoints.keys())}.')
+    await bot.say(dnd_command.get_item_detail(key, value))
 
 
 @bot.command()
