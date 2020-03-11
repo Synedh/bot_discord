@@ -1,18 +1,17 @@
 import os
 import re
-import shlex
 import random
 import discord
 import requests
 from discord.ext.commands import Bot
 from discord.errors import HTTPException, NotFound
-from discord.ext.commands.errors import CommandNotFound, BadArgument
+from discord.ext.commands.errors import BadArgument
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from datetime import datetime
 
 import model
-from bot import images
+from bot import images, dnd
 from bot import stats as stats_command
 from bot.hangman import Hangman
 from bot.moreorless import MoreOrLess
@@ -42,7 +41,8 @@ command_list = [
     'pick',
     'stats',
     'yt',
-    'poll'
+    'poll',
+    'dnd'
 ]
 mol = None
 mh = None
@@ -57,20 +57,20 @@ async def hello(ctx):
 @bot.command(pass_context=True)
 async def save_image(ctx, img_name=None):
     """Save an image in bot database."""
-    if img_name == None:
+    if img_name is None:
         await bot.say('No given name.')
     else:
         try:
             saved = images.save_image(session, ctx.message.attachments[0]['url'], img_name, str(ctx.message.author))
             await bot.say(saved['msg'])
-        except IndexError as e:
+        except IndexError:
             await bot.say('No given image.')
 
 
 @bot.command(pass_context=True)
 async def image(ctx, img_name=None):
     """Print image of given name."""
-    if img_name == None:
+    if img_name is None:
         await bot.say('No given name.')
     else:
         resp = images.get_image(session, img_name)
@@ -85,7 +85,7 @@ async def image(ctx, img_name=None):
 @bot.command()
 async def delete_image(img_name=None):
     """Delete image of given name."""
-    if img_name == None:
+    if img_name is None:
         await bot.say('No given name.')
     else:
         await bot.say(images.delete_image(session, img_name)['msg'])
@@ -117,7 +117,7 @@ async def quote(ctx, msg_id=None, channel=None):
         return
     try:
         em = discord.Embed(description=msg.clean_content, colour=msg.author.roles[-1].color)
-    except AttributeError as e:
+    except AttributeError:
         em = discord.Embed(description=msg.clean_content)
     em.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
     await bot.say(msg.author.mention, embed=em)
@@ -127,18 +127,18 @@ async def quote(ctx, msg_id=None, channel=None):
 async def roll(qty=None, dice=None):
     """Roll some dices."""
     try:
-        if qty == None:
+        if qty is None:
             await bot.say('Nothing to roll !')
-        elif dice == None:
+        elif dice is None:
             await bot.say('Rolled ' + str(random.randint(1, int(qty))) + '.')
         elif int(qty) < 2000:
             values = [random.randint(1, int(dice)) for i in range(0, int(qty))]
             await bot.say('Rolled ' + ', '.join([str(value) for value in values]) + '.\nTotal value : ' + str(sum(values)) + '.')
         else:
             await bot.say('Too many dices to roll !')
-    except ValueError as e:
+    except ValueError:
         await bot.say('Invalid dice values.')
-    except HTTPException as e:
+    except HTTPException:
         await bot.say('Too many dices to roll !')
 
 
@@ -156,9 +156,9 @@ async def yt(*keywords: str):
     """Send first result of youtube research with given keywords."""
     if len(keywords) > 0:
         await bot.say((
-            'https://youtube.com%s' 
+            'https://youtube.com%s'
             % (re.search(r'href=\"(/watch\?v=.*?)\"',
-            requests.get('https://www.youtube.com/results?search_query=%s' % '+'.join(keywords)).text)[1])
+                         requests.get('https://www.youtube.com/results?search_query=%s' % '+'.join(keywords)).text)[1])
         ))
     else:
         await bot.say('No keyword to search')
@@ -179,6 +179,12 @@ async def poll(ctx, question: str, *answers: str):
 
 
 @bot.command()
+async def dnd(key:str, *value):
+    await bot.say(dnd.get_item_detail(key, value))
+
+
+
+@bot.command()
 async def moreorless(command: str):
     """Start a new More or Less game with !moreorless start"""
     global mol
@@ -186,7 +192,7 @@ async def moreorless(command: str):
         mol = MoreOrLess()
         await bot.say('Started new More or Less game.\n' + mol.select_message)
     elif mol and command == 'stop':
-        await bot.say(close_message)
+        await bot.say(mol.close_message)
         mol = None
     else:
         try:
@@ -198,11 +204,11 @@ async def moreorless(command: str):
             elif status == 3:
                 await bot.say(message + '\n' + mol.close_message)
                 mol = None
-        except ValueError as e:
+        except ValueError:
             await bot.say('Invalid given value %s : must be an integer.' % command)
-        except AttributeError as e:
-            await bot.say('Not any game started. Type "!moreorless start" to start new game.'
-)
+        except AttributeError:
+            await bot.say('Not any game started. Type "!moreorless start" to start new game.')
+
 
 @bot.command()
 async def pendu(command: str):
@@ -224,6 +230,7 @@ async def pendu(command: str):
     else:
         await bot.say('Invalid given value %s : do you want to start a new game ?' % command)
 
+
 @bot.command(pass_context=True)
 async def stats(ctx, detail: str=''):
     """Get stats of given server. Use @user or #channel for details."""
@@ -238,17 +245,17 @@ async def stats(ctx, detail: str=''):
 
 
 @bot.event
-async def on_message(message):      
+async def on_message(message):
     stats_command.add_entry(session, message)
     if len(message.content) > 0 and message.content.split()[0][1:] in command_list:
         with open(dir_path + '/log/commands.log', "a+") as file:
             file.write(
                 '{0};{1};{2};{3};{4}\n'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                message.server, message.channel, message.author, message.content)
+                                               message.server, message.channel, message.author, message.content)
             )
         try:
             await bot.process_commands(message)
-        except BadArgument as e: 
+        except BadArgument as e:
             await bot.say(e)
 
 

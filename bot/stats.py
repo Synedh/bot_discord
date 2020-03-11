@@ -5,14 +5,13 @@ import model
 
 
 def add_entry(session, message):
-    queryuser = (session.query(model.User)
-        .filter(model.User.id == message.author.id))
+    queryuser = (session.query(model.User).filter(model.User.id == message.author.id))
     if queryuser.count() == 0:
         user = model.User(
-            id = message.author.id,
-            username = str(message.author),
-            isInTite = (str(message.channel.id) == '202909295526805505'),
-            hasEnougthRank = False
+            id=message.author.id,
+            username=str(message.author),
+            isInTite=(str(message.channel.id) == '202909295526805505'),
+            hasEnougthRank=False
         )
         session.add(user)
     else:
@@ -35,10 +34,12 @@ def week_stats(session, server):
     last_week = datetime.now() - timedelta(days=7)
     user_stats = {}
     channel_stats = {}
-    query = (session.query(model.Message)
+    query = (
+        session.query(model.Message)
         .filter(model.Message.server == str(server))
         .filter(model.Message.date >= last_week)
-        .filter(model.Message.channel != '433665712247144463'))
+        .filter(model.Message.channel != '433665712247144463')
+    )
 
     for message in query:
         if message.user_id != 275988520093614091:
@@ -50,29 +51,28 @@ def week_stats(session, server):
     channel_detail = '\n'.join(['- <#%s> : %d' % stats for stats in ordered_channel_stats[:5]])
 
     return ((
-        '%d messages envoyés les 7 derniers jours.\n\n'
-        + 'Les plus gros posteurs des 7 derniers jours :\n%s\n\n'
-        + 'Les canaux des 7 derniers jours :\n%s')
-        % (sum(user_stats.values()), user_detail, channel_detail)
+        '%d messages envoyés les 7 derniers jours.\n\n' +
+        'Les plus gros posteurs des 7 derniers jours :\n%s\n\n' +
+        'Les canaux des 7 derniers jours :\n%s') %
+        (sum(user_stats.values()), user_detail, channel_detail)
     )
 
 
 def user_stats(session, server, user_id):
-    last_week = datetime.now() - timedelta(days=7)
+    # last_week = datetime.now() - timedelta(days=7)
     date_stats = {}
     channel_stats = {}
 
-
     try:
         query = (session.query(model.Message)
-            .filter(model.Message.server == str(server))
-            .filter(model.Message.user_id == int(re.search(r'([0-9]+)', user_id)[0]))
-            .filter(model.Message.channel != '433665712247144463'))
-    except ValueError as e:
+                 .filter(model.Message.server == str(server))
+                 .filter(model.Message.user_id == int(re.search(r'([0-9]+)', user_id)[0]))
+                 .filter(model.Message.channel != '433665712247144463'))
+    except ValueError:
         query = (session.query(model.Message)
-            .filter(model.Message.server == str(server))
-            .filter(model.Message.user.username == user_id[1:])
-            .filter(model.Message.channel != '433665712247144463'))
+                 .filter(model.Message.server == str(server))
+                 .filter(model.Message.user.username == user_id[1:])
+                 .filter(model.Message.channel != '433665712247144463'))
         if query.count > 0:
             user_id = '<@' + query.first().user_id + '>'
 
@@ -88,20 +88,21 @@ def user_stats(session, server, user_id):
     date_detail = '\n'.join([' - Semaine %s : %d' % stats for stats in ordered_date_stats])
 
     return ((
-        '%s a posté %d messages les 7 derniers jours.\n\n'
-        + 'Canaux favoris :\n%s\n\n'
-        + 'Historique des dernières semaines :\n%s')
-        % (user_id, sum(channel_stats.values()), channel_detail, date_detail)
+        '%s a posté %d messages les 7 derniers jours.\n\n' +
+        'Canaux favoris :\n%s\n\n' +
+        'Historique des dernières semaines :\n%s') %
+        (user_id, sum(channel_stats.values()), channel_detail, date_detail)
     )
 
+
 def channel_stats(session, server, channel):
-    last_week = datetime.now() - timedelta(days=7)
+    # last_week = datetime.now() - timedelta(days=7)
     date_stats = {}
     user_stats = {}
 
     query = (session.query(model.Message)
-        .filter(model.Message.server == str(server))
-        .filter(model.Message.channel == re.search(r'([0-9]+)', channel[2:-1])[0]))
+             .filter(model.Message.server == str(server))
+             .filter(model.Message.channel == re.search(r'([0-9]+)', channel[2:-1])[0]))
 
     for message in query:
         if message.date > datetime.now() - timedelta(days=7):
@@ -115,8 +116,8 @@ def channel_stats(session, server, channel):
     date_detail = '\n'.join([' - Semaine %s : %d' % stats for stats in ordered_date_stats])
 
     return ((
-        '%d messages ont étés postés les 7 derniers jours dans %s\n\n'
-        + 'Les plus gros posteurs des 7 derniers jours :\n%s\n\n'
-        + 'Historique des dernières semaines :\n%s')
-        % (sum(user_stats.values()), channel, user_detail, date_detail)
+        '%d messages ont étés postés les 7 derniers jours dans %s\n\n' +
+        'Les plus gros posteurs des 7 derniers jours :\n%s\n\n' +
+        'Historique des dernières semaines :\n%s') %
+        (sum(user_stats.values()), channel, user_detail, date_detail)
     )
