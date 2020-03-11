@@ -179,12 +179,12 @@ async def poll(ctx, question: str, *answers: str):
             await bot.add_reaction(message, emotes[i])
 
 
-@bot.command()
-async def dnd(key:str, *value):
-    """Search some dnd data in french"""
-    if key == 'help':
-        await bot.say(f'Infos possibles : {", ".join(dnd_command.endpoints.keys())}.')
-    await bot.say(dnd_command.get_item_detail(key, value))
+# @bot.command()
+# async def dnd(key:str, *value):
+#     """Search some dnd data in french"""
+#     if key == 'help':
+#         await bot.say(f'Infos possibles : {", ".join(dnd_command.endpoints.keys())}.')
+#     await bot.say(dnd_command.get_item_detail(key, ' '.join(value)))
 
 
 @bot.command()

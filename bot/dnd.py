@@ -37,7 +37,11 @@ def is_in_or_close(soup, item):
             pass
     if item in items:
         return item
-    return difflib.get_close_matches(item, items, n=5)
+    return difflib.get_close_matches(item, items, n=5, cutoff=0.8)
+
+
+def format_item_html(body):
+    message = body.get(h1).get_text()
 
 
 def get_item_detail(key, value):
@@ -47,6 +51,8 @@ def get_item_detail(key, value):
     else:
         if type(item_names) == list:
             item_names = item_names[0]
-            print(f'"{value}" n\'existe pas. Recherche de "{item_names}" à la place.')
+            start = f'"{value}" n\'existe pas. Recherche de "{item_names}" à la place.\n'
+        else:
+            start = ''
         item_soup = get_soup(key, item_names)
-        return item_soup.find(class_='bloc')
+        return f'{start}{item_soup.find(class_="bloc")}'
