@@ -2,6 +2,8 @@ token
 pip-selfcheck.json
 bin/
 lib/
+__pycache__
 account.db
 *.log
 *.pyc
+old/
