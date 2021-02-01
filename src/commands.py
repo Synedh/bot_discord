@@ -4,7 +4,7 @@ import requests
 from pony import orm
 from discord.ext import commands
 
-from models import Message
+from .models import Message
 
 
 class DefaultCommands(commands.Cog):

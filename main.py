@@ -2,12 +2,14 @@ import pathlib
 import configparser
 from discord.ext import commands
 
-import stats
-import commands as com
-from models import Message
+from src import stats
+from src import commands as com
+from src.models import Message
+from src.logging import log_in, log_out
 
+ROOT_PATH = pathlib.Path(__file__).parent.absolute()
 config = configparser.ConfigParser()
-config.read(pathlib.Path(__file__).parent.absolute() / 'config.ini')
+config.read(ROOT_PATH / 'config.ini')
 bot = commands.Bot(command_prefix=commands.when_mentioned_or('!'), pm_help=True)
 TOKEN = config['discord']['token']
 
@@ -22,7 +24,7 @@ async def on_message(message):
 
 @bot.event
 async def on_command(ctx):
-    print(ctx.message.content)
+    log_in(ctx)
 
 
 @bot.event

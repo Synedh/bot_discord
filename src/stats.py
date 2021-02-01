@@ -2,7 +2,7 @@ from pony import orm
 from discord.ext import commands
 from datetime import datetime, timedelta
 
-from models import Message
+from .models import Message
 
 class StatsCommands(commands.Cog):
     def __init__(self, bot):
