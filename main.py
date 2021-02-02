@@ -1,10 +1,12 @@
 import pathlib
 import configparser
+
 from discord.ext import commands
 
 from src import stats
 from src import commands as com
 from src.models import Message
+from src.tasks import MondayList
 from src.logging import log_in, log_out
 
 ROOT_PATH = pathlib.Path(__file__).parent.absolute()
@@ -39,6 +41,7 @@ async def on_ready():
     print('---------')
 
 
+bot.add_cog(MondayList(bot))
 bot.add_cog(com.DefaultCommands(bot))
 bot.add_cog(stats.StatsCommands(bot))
 bot.run(TOKEN)
