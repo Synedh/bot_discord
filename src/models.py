@@ -1,8 +1,8 @@
 from pony import orm
 from datetime import datetime
 
-db = orm.Database(provider='sqlite', filename=':memory:')
-# db = orm.Database(provider='sqlite', filename='db.sqlite', create_db=True)
+# db = orm.Database(provider='sqlite', filename=':memory:')
+db = orm.Database(provider='sqlite', filename='../db.sqlite', create_db=True)
 
 class Message(db.Entity):
     id = orm.PrimaryKey(str)

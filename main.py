@@ -6,42 +6,41 @@ from discord.ext import commands
 from src import stats
 from src import commands as com
 from src.models import Message
-from src.tasks import MondayList
-from src.logging import log_in, log_out
+from src.logger import pprint, log_in, logged_send
+from src.custom_bot import CustomBot
 
 ROOT_PATH = pathlib.Path(__file__).parent.absolute()
 config = configparser.ConfigParser()
 config.read(ROOT_PATH / 'config.ini')
-bot = commands.Bot(command_prefix=commands.when_mentioned_or('!'), pm_help=True)
+bot = CustomBot(command_prefix=commands.when_mentioned_or('!'), pm_help=True)
 TOKEN = config['discord']['token']
 
 
 @bot.event
 async def on_message(message):
-    if message.author == bot.user:
-        return
-    stats.add_entry(message)
-    await bot.process_commands(message)
-
-
-@bot.event
-async def on_command(ctx):
-    log_in(ctx)
+    if not message.author.bot:
+        stats.add_entry(message)
+        if (message.content.startswith('!') and message.content[1:] != ''
+            or message.content.startswith(f'<@!{bot.user.id}>') and message.content[len(f'<@!{bot.user.id}>'):] != ''):
+            log_in(message)
+        await bot.process_commands(message)
 
 
 @bot.event
 async def on_command_error(ctx, error):
-    await ctx.send(error)
-    raise error
+    await logged_send(ctx, error)
+    try:
+        raise error
+    except commands.errors.CommandNotFound:
+        pass
 
 
 @bot.event
 async def on_ready():
-    print(f'We have logged in as {bot.user}.')
-    print('---------')
+    pprint(f'Logged in as {bot.user}.')
+    pprint('---------')
 
 
-bot.add_cog(MondayList(bot))
 bot.add_cog(com.DefaultCommands(bot))
 bot.add_cog(stats.StatsCommands(bot))
 bot.run(TOKEN)
