@@ -12,8 +12,12 @@ from src.custom_bot import CustomBot
 ROOT_PATH = pathlib.Path(__file__).parent.absolute()
 config = configparser.ConfigParser()
 config.read(ROOT_PATH / 'config.ini')
-bot = CustomBot(command_prefix=commands.when_mentioned_or('!'), pm_help=True)
-TOKEN = config['discord']['token']
+bot = CustomBot(
+    command_prefix=commands.when_mentioned_or('!'),
+    pm_help=True,
+    weekly_stats_channel=int(config['discord']['WEEKLY_STATS_CHANNEL']),
+    weekly_stats_server=int(config['discord']['WEEKLY_STATS_SERVER']))
+TOKEN = config['discord']['TOKEN']
 
 
 @bot.event
