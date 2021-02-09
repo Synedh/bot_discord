@@ -17,4 +17,4 @@ def log_out(ctx, content):
 
 async def logged_send(ctx, content):
     log_out(ctx, content)
-    await ctx.send(content)
+    return await ctx.send(content)
