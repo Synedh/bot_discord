@@ -3,6 +3,7 @@ from discord.ext import commands
 from datetime import datetime, timedelta
 
 from .models import Message
+from .logger import logged_send
 
 class StatsCommands(commands.Cog):
     def __init__(self, bot):
@@ -12,13 +13,13 @@ class StatsCommands(commands.Cog):
     async def stats(self, ctx, detail: str=None):
         """Get stats of given server. Use @user or #channel for details."""
         if not detail:
-            await ctx.send(week_stats(ctx.message.guild.id))
+            await logged_send(ctx, week_stats(ctx.message.guild.id))
         elif detail[1] == '@':
-            await ctx.send(user_stats(ctx.message.guild.id, detail[2:-1]))
+            await logged_send(ctx, user_stats(ctx.message.guild.id, detail[2:-1]))
         elif detail[1] == '#':
-            await ctx.send(channel_stats(ctx.message.guild.id, detail[2:-1]))
+            await logged_send(ctx, channel_stats(ctx.message.guild.id, detail[2:-1]))
         else:
-            await ctx.send(f'Invalid given value "{detail}". Please tag a channel or a user.')
+            await logged_send(ctx, f'Invalid given value "{detail}". Please tag a channel or a user.')
 
 
 @orm.db_session

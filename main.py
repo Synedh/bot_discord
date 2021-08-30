@@ -1,11 +1,13 @@
 import pathlib
 import configparser
+from src.models import Birthday
 
 from discord.ext import commands
+from pony.thirdparty.compiler.ast import Bitand
 
 from src import stats
+from src import birthday
 from src import commands as com
-from src.models import Message
 from src.logger import pprint, log_in, logged_send
 from src.custom_bot import CustomBot
 
@@ -47,4 +49,5 @@ async def on_ready():
 
 bot.add_cog(com.DefaultCommands(bot))
 bot.add_cog(stats.StatsCommands(bot))
+bot.add_cog(birthday.BirthdayCommands(bot))
 bot.run(TOKEN)

@@ -5,7 +5,6 @@ import requests
 from pony import orm
 from discord.ext import commands
 
-from .models import Message
 from .logger import logged_send
 
 
