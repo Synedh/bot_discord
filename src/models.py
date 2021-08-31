@@ -20,8 +20,9 @@ class Message(db.Entity):
 class Birthday(db.Entity):
     user_id = orm.Required(str, unique=True)
     birth_date = orm.Required(datetime)
+    last_birthday = orm.Optional(int)
 
     def __repr__(self):
-        return f'<Birthday (user_id="{self.user_id}", date="{self.birth_date}")>'
+        return f'<Birthday (user_id="{self.user_id}", birth_date="{self.birth_date}", last_birthday="{self.last_birthday}")>'
 
 db.generate_mapping(create_tables=True)

@@ -1,9 +1,10 @@
 import asyncio
 from datetime import datetime, timedelta
 
-from discord.ext import commands
+from discord.ext import tasks, commands
 
 from .stats import week_stats
+from .birthday import send_birthdays
 from .logger import pprint
 
 
@@ -12,9 +13,10 @@ class CustomBot(commands.Bot):
         super().__init__(*args, **kwargs)
 
         self.bg_task = self.loop.create_task(self.weekly_stats())
+        self.birthdays.start()
         self.first = True
-        self.weekly_stats_channel = kwargs['weekly_stats_channel']
-        self.weekly_stats_server = kwargs['weekly_stats_server']
+        self.default_channel = kwargs['default_channel']
+        self.default_server = kwargs['default_server']
 
     def __get_next_iteration(self):
         now = datetime.now()
@@ -27,13 +29,24 @@ class CustomBot(commands.Bot):
 
     async def weekly_stats(self):
         await self.wait_until_ready()
-        channel = self.get_channel(self.weekly_stats_channel)
+        channel = self.get_channel(self.default_channel)
         next_date = self.__get_next_iteration()
         if self.first:
             self.first = False
             pprint(f'Next weekly stats in {timedelta(seconds=next_date)}')
         else:
-            stats = week_stats(self.weekly_stats_server)
-            self.__log_task(self.weekly_stats_server, self.weekly_stats_channel, stats)
+            stats = week_stats(self.default_server)
+            self.__log_task(self.default_server, self.default_channel, stats)
             await channel.send(stats)
         await asyncio.sleep(next_date)
+    
+    @tasks.loop(minutes=2.0)
+    async def birthdays(self):
+        await self.wait_until_ready()
+        channel = self.get_channel(self.default_channel)
+        birthdays = send_birthdays(auto=True)
+        if not birthdays:
+            return
+        self.__log_task(self.default_server, self.default_channel, birthdays)
+        await channel.send(birthdays)
+        

@@ -3,3 +3,4 @@ old/
 *.sqlite
 *.ini
 *.log
+.vscode
