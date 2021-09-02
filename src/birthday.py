@@ -44,12 +44,12 @@ def list_birthdates(guild):
             'date': birthday.birth_date.strftime("%d %b %Y"),
             'next_days': next_days,
             'next': 'aujourd\'hui' if next_days == 0 else 'demain' if next_days == 1 else f'dans {next_days} jours',
-            'age': int(((delta1 if delta1 >= now else delta2) - birthday.birth_date.date()).days / 365.25),
+            'age': int(round(((delta1 if delta1 >= now else delta2) - birthday.birth_date.date()).days / 365.25)),
         })
     birthdays.sort(key=lambda birthday: birthday['next_days'])
     return (
         'Liste des anniversaires enregistrés sur ce serveur :\n\n' +
-        '\n'.join([f'- {birthday["user"]}: {birthday["date"]} ({birthday["next"]}, {birthday["age"]} ans)' for birthday in birthdays])
+        '\n'.join([f'- {birthday["user"]}: {birthday["date"]} ({birthday["age"]} ans {birthday["next"]})' for birthday in birthdays])
     )
 
 

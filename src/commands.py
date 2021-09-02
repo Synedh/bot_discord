@@ -41,8 +41,6 @@ class DefaultCommands(commands.Cog):
                 await logged_send(ctx, 'Too many dices to roll !')
         except ValueError:
             await logged_send(ctx, 'Invalid dice values.')
-        # except ???:
-        #     await logged_send(ctx, 'Too many dices to roll !')
 
 
     @commands.command()
