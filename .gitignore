@@ -1,5 +1,7 @@
 __pycache__/
 old/
+bot_discord/
 *.sqlite
 *.ini
 *.log
+.vscode

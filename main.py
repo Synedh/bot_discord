@@ -2,6 +2,7 @@ import pathlib
 import configparser
 from src.models import Birthday
 
+import discord
 from discord.ext import commands
 from pony.thirdparty.compiler.ast import Bitand
 
@@ -16,9 +17,10 @@ config = configparser.ConfigParser()
 config.read(ROOT_PATH / 'config.ini')
 bot = CustomBot(
     command_prefix=commands.when_mentioned_or('!'),
+    intents=discord.Intents(members=True, messages=True, guilds=True),
     pm_help=True,
-    weekly_stats_channel=int(config['discord']['WEEKLY_STATS_CHANNEL']),
-    weekly_stats_server=int(config['discord']['WEEKLY_STATS_SERVER']))
+    default_channel=int(config['discord']['DEFAULT_CHANNEL']),
+    default_server=int(config['discord']['DEFAULT_SERVER']))
 TOKEN = config['discord']['TOKEN']
 
 

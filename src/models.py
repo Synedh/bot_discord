@@ -1,9 +1,21 @@
-from enum import auto
-from pony import orm
+import pathlib
+import configparser
 from datetime import datetime
 
-db = orm.Database(provider='sqlite', filename=':memory:')
-# db = orm.Database(provider='sqlite', filename='../db.sqlite', create_db=True)
+from pony import orm
+
+ROOT_PATH = pathlib.Path(__file__).parent.parent.absolute()
+config = configparser.ConfigParser()
+config.read(ROOT_PATH / 'config.ini')
+
+try:
+    prod = config['config']['TYPE'] != 'DEBUG'
+except KeyError:
+    prod = True
+if prod:
+    db = orm.Database(provider='sqlite', filename=str(ROOT_PATH / 'db.sqlite'), create_db=True)
+else:
+    db = orm.Database(provider='sqlite', filename=':memory:')
 
 class Message(db.Entity):
     id = orm.PrimaryKey(str)
@@ -20,8 +32,9 @@ class Message(db.Entity):
 class Birthday(db.Entity):
     user_id = orm.Required(str, unique=True)
     birth_date = orm.Required(datetime)
+    last_birthday = orm.Optional(int)
 
     def __repr__(self):
-        return f'<Birthday (user_id="{self.user_id}", date="{self.birth_date}")>'
+        return f'<Birthday (user_id="{self.user_id}", birth_date="{self.birth_date}", last_birthday="{self.last_birthday}")>'
 
 db.generate_mapping(create_tables=True)
