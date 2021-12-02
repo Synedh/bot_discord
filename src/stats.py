@@ -41,7 +41,7 @@ def week_stats(server_id):
     user_stats = {}
     channel_stats = {}
 
-    query = Message.select(lambda m: m.server_id == server_id and m.datetime >= last_week and m.channel_id != '433665712247144463')
+    query = Message.select(lambda m: m.server_id == server_id and m.datetime >= last_week and m.channel_id not in ['433665712247144463', '916071520554614785'])
     for message in query:
         user_stats[message.user_id] = user_stats.get(message.user_id, 0) + 1
         channel_stats[message.channel_id] = channel_stats.get(message.channel_id, 0) + 1
