@@ -4,12 +4,15 @@ from datetime import datetime
 
 from pony import orm
 
+from .logger import pprint
+
 ROOT_PATH = pathlib.Path(__file__).parent.parent.absolute()
 config = configparser.ConfigParser()
 config.read(ROOT_PATH / 'config.ini')
 
 try:
     prod = config['config']['TYPE'] != 'DEBUG'
+    pprint('Start in debug mode.')
 except KeyError:
     prod = True
 if prod:

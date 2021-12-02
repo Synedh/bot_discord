@@ -68,3 +68,38 @@ class DefaultCommands(commands.Cog):
             message = await logged_send(ctx, '**Nouveau sondage !\n%s**\n' % question + '\n'.join(['%s %s' % (emotes[i], answer) for i, answer in enumerate(answers)]))
             for i in range(len(answers)):
                 await message.add_reaction(emotes[i])
+    
+    @commands.command()
+    async def register(self, ctx):
+        try:
+            image_url = ctx.message.attachments[0].url
+        except IndexError:
+            try:
+                image_url = re.findall(r'https://.*?\.(?:png)|(?:jpg)|(?:webm)|(?:gif)', ctx.message.content)[0]
+            except IndexError:
+                await logged_send(ctx, 'There is no image in your message.')
+        channel = self.bot.get_channel(916071520554614785)
+        try:
+            await [message for message in await channel.history().flatten() if ctx.message.author.mention in message.content][0].delete()
+            erased = True
+        except IndexError:
+            erased = False
+        message = await channel.send(f'PP de noel de {ctx.author.mention} :\n{image_url}')
+        content = f'Participation validée au concours, disponible ici : <{message.jump_url}>.'
+        if erased:
+            content += '\nCelle-ci a remplacée ta participation précédente.'
+        ctx = await logged_send(ctx, content)
+    
+    @commands.command()
+    async def votes(self, ctx):
+        channel = self.bot.get_channel(916071520554614785)
+        users = []
+        for message in await channel.history().flatten():
+            name = ctx.guild.get_member(int(re.search(r'<@(\d+?)>', message.content).group(1))).name
+            count = next(iter(reaction.count for reaction in message.reactions if reaction.custom_emoji and reaction.emoji.name == 'this'), 0)
+            users.append({'name': name, 'count': count})
+        content = 'Liste des participants et votants :\n'
+        for user in sorted(users, key=lambda user: user['count']):
+            content += f'- {user["name"]} : {user["count"]}'
+        await logged_send(ctx, content)
+
