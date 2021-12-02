@@ -96,13 +96,13 @@ class DefaultCommands(commands.Cog):
         users = []
         for message in await channel.history().flatten():
             try:
-                name = ctx.guild.get_member(int(re.search(r'<@(\d+?)>', message.content).group(1))).name
+                name = ctx.guild.get_member(int(re.search(r'<@!?(\d+?)>', message.content).group(1))).name
                 count = next(iter(reaction.count for reaction in message.reactions if reaction.custom_emoji and reaction.emoji.name == 'this'), 0)
                 users.append({'name': name, 'count': count})
-            except AttributeError:
+            except AttributeError as e:
                 continue
         content = 'Liste des participants et votants :\n'
-        for user in sorted(users, key=lambda user: user['count']):
-            content += f'- {user["name"]} : {user["count"]}'
+        for user in sorted(users, key=lambda user: -user['count']):
+            content += f'- {user["name"]} : {user["count"]}\n'
         await logged_send(ctx, content)
 
