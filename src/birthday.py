@@ -17,12 +17,12 @@ class BirthdayCommands(commands.Cog):
         if cmd == 'list':
             await logged_send(ctx, list_birthdates(ctx.message.guild))
         elif cmd == 'add':
-            if user_id and ctx.message.author.id == 114880864772423682:
+            if user_id and ctx.message.author.id == SYNEDH_USER_ID:
                 await logged_send(ctx, add_birthdate(ctx.message.guild.get_member(int(user_id)), date))
             else:
                 await logged_send(ctx, add_birthdate(ctx.message.author, date))
         elif cmd == 'rm':
-            if date and ctx.message.author.id == 114880864772423682:
+            if date and ctx.message.author.id == SYNEDH_USER_ID:
                 await logged_send(ctx, rm_birthdate(ctx.message.guild.get_member(int(date))))
             else:
                 await logged_send(ctx, rm_birthdate(ctx.message.author))

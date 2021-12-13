@@ -2,7 +2,6 @@ import re
 import random
 
 import requests
-from pony import orm
 from discord.ext import commands
 
 from .logger import logged_send

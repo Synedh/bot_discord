@@ -40,4 +40,11 @@ class Birthday(db.Entity):
     def __repr__(self):
         return f'<Birthday (user_id="{self.user_id}", birth_date="{self.birth_date}", last_birthday="{self.last_birthday}")>'
 
+
+class NSFWChannel(db.Entity):
+    id = orm.PrimaryKey(str)
+
+    def __repr__(self):
+        return f'<NSFWChannel id="{self.id}")>'
+
 db.generate_mapping(create_tables=True)
