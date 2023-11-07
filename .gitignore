@@ -1,0 +1,15 @@
+# IDE
+.vscode/
+
+# Project tools
+.mypy_cache
+.env
+*.log
+
+# Python
+.env/
+.venv/
+env/
+venv/
+__pycache__/
+*.pyc
