@@ -29,6 +29,19 @@ class ThisIsTheBot(commands.Bot):
         if interaction.data and interaction.type == InteractionType.application_command:
             self._log_input(interaction)
 
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx: commands.Context['ThisIsTheBot'], error) -> None: # type: ignore
+        if isinstance(error, commands.MemberNotFound):
+            await self.send(ctx, "I could not find member '{error.argument}'. Please try again")
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await self.send(ctx, f"'{error.param.name}' is a required argument.")
+        else:
+            logging.error(
+                f'Ignoring exception in command {ctx.command}:',
+                exc_info=(type(error), error, error.__traceback__)
+            )
+            await self.send(ctx, 'Exception occured in command.')
+
     def _log_message(self, message: Message) -> None:
         logging.info(
             '--- %d;%d;%d;%s',

@@ -29,6 +29,8 @@ DEFAULT_SERVER = int(str(os.getenv('DEFAULT_SERVER')))
 with open(BASE_DIR / 'log_config.json', encoding='utf-8') as logconfig:
     logging.config.dictConfig(json.load(logconfig))
 
+discord.utils.setup_logging(root=False)
+
 if not PROD:
     logging.info('Started debug mode.')
 
