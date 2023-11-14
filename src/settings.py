@@ -28,6 +28,8 @@ with open(BASE_DIR / 'log_config.yml', encoding='utf-8') as logconfig:
 
 discord.utils.setup_logging(root=False)
 
+discord.utils.setup_logging(root=False)
+
 if not PROD:
     logging.info('Started debug mode.')
 
