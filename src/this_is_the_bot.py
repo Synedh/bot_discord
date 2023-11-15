@@ -1,5 +1,7 @@
 import logging
 from typing import Any
+import sys
+import traceback
 
 import discord
 from discord.ext import commands
