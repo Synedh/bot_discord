@@ -6,10 +6,7 @@ from pathlib import Path
 
 import discord
 import dotenv
-from discord.ext import commands
 from pony import orm
-
-from src.this_is_the_bot import ThisIsTheBot
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 dotenv.load_dotenv(BASE_DIR / '.env')
@@ -39,15 +36,6 @@ modules = [
     for file in os.listdir(BASE_DIR / 'src' / 'modules')
     if not file.startswith('_')
 ]
-
-bot = ThisIsTheBot(
-    modules=modules,
-    command_prefix=commands.when_mentioned_or(PREFIX),
-    intents=discord.Intents.all(),
-    pm_help=True,
-    default_channel=DEFAULT_CHANNEL,
-    default_server=DEFAULT_SERVER,
-)
 
 if PROD:
     database = orm.Database(
