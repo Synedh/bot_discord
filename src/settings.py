@@ -32,7 +32,7 @@ if not PROD:
     logging.info('Started debug mode.')
 
 modules = [
-    f'src.modules.{file.replace('.py', '')}'
+    f'src.modules.{file.replace(".py", "")}'
     for file in os.listdir(BASE_DIR / 'src' / 'modules')
     if not file.startswith('_')
 ]

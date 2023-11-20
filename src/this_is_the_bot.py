@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from discord import Interaction, InteractionType, Message
+import discord
 from discord.ext import commands
 
 
@@ -15,34 +15,37 @@ class ThisIsTheBot(commands.Bot):
             await self.load_extension(module)
         await self.tree.sync()
 
-    async def send(self, ctx: commands.Context['ThisIsTheBot'], content: str, *args: Any) -> None:
-        await ctx.send(content, *args)
-        self._log_output(ctx, content)
+    async def send(self, ctx: commands.Context['ThisIsTheBot'], content: str | None = None, **kwargs: Any) -> None:
+        await ctx.send(content, **kwargs)
+        self._log_output(ctx, content, **kwargs)
+
+    async def send_error(self, ctx: commands.Context['ThisIsTheBot'], content: str, *, title: str = 'Error', **kwargs: Any) -> None:
+        embed = discord.Embed(
+            title=title,
+            description=content,
+            color=discord.Color.red()
+        )
+        await ctx.send(embed=embed, ephemeral=True, **kwargs)
 
     @commands.Cog.listener()
-    async def on_message(self, message: Message) -> None:
+    async def on_message(self, message: discord.Message) -> None:
         if not message.author.bot:
             self._log_message(message)
 
     @commands.Cog.listener()
-    async def on_interaction(self, interaction: Interaction['ThisIsTheBot']) -> None:
-        if interaction.data and interaction.type == InteractionType.application_command:
+    async def on_interaction(self, interaction: discord.Interaction['ThisIsTheBot']) -> None:
+        if interaction.data and interaction.type == discord.InteractionType.application_command:
             self._log_input(interaction)
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx: commands.Context['ThisIsTheBot'], error) -> None: # type: ignore
-        if isinstance(error, commands.MemberNotFound):
-            await self.send(ctx, "I could not find member '{error.argument}'. Please try again")
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await self.send(ctx, f"'{error.param.name}' is a required argument.")
-        else:
-            logging.error(
-                f'Ignoring exception in command {ctx.command}:',
-                exc_info=(type(error), error, error.__traceback__)
-            )
-            await self.send(ctx, 'Exception occured in command.')
+    async def on_command_error(self, ctx: commands.Context, error: Exception) -> None: # type: ignore
+        logging.error(
+            f'Ignoring exception in command {ctx.command}:',
+            exc_info=(type(error), error, error.__traceback__)
+        )
+        await self.send_error(ctx, f'Exception occured in command :\n{error}')
 
-    def _log_message(self, message: Message) -> None:
+    def _log_message(self, message: discord.Message) -> None:
         logging.info(
             '--- %d;%d;%d;%s',
             message.guild.id if message.guild else None,
@@ -51,7 +54,7 @@ class ThisIsTheBot(commands.Bot):
             message.content
         )
 
-    def _log_input(self, interaction: Interaction['ThisIsTheBot']) -> None:
+    def _log_input(self, interaction: discord.Interaction['ThisIsTheBot']) -> None:
         logging.info(
             '<<< %d;%d;%d;%s',
             interaction.guild.id if interaction.guild else None,
@@ -60,11 +63,12 @@ class ThisIsTheBot(commands.Bot):
             interaction.data
         )
 
-    def _log_output(self, ctx: commands.Context['ThisIsTheBot'], content: str) -> None:
+    def _log_output(self, ctx: commands.Context['ThisIsTheBot'], content: str | None = None, embed: discord.Embed | None = None) -> None:
         logging.info(
-            '>>> %d;%d;%d;%s',
+            '>>> %d;%d;%d;%s;%s',
             ctx.guild.id if ctx.guild else None,
             ctx.channel.id if ctx.channel else None,
             ctx.author.id if ctx.author else None,
-            content
+            content,
+            embed.title if embed else None
         )
