@@ -30,7 +30,12 @@ class DefaultCommands(commands.Cog, name=MODULE_NAME):
 
 
     @commands.hybrid_command() # type: ignore
-    async def roll(self, ctx: commands.Context[ThisIsTheBot], dice: commands.Range[int, 1, 100], qty: commands.Range[int, 1, 100] | None=None) -> None:
+    async def roll(
+        self,
+        ctx: commands.Context[ThisIsTheBot],
+        dice: commands.Range[int, 1, 100],
+        qty: commands.Range[int, 1, 100] | None=None
+    ) -> None:
         """Roll some dices."""
         try:
             if qty is None:
@@ -53,7 +58,10 @@ class DefaultCommands(commands.Cog, name=MODULE_NAME):
         keyword_list = keywords.split()
         if keyword_list:
             query = "+".join(keyword_list)
-            results = requests.get(f'https://www.youtube.com/results?search_query={query}').text
+            results = requests.get(
+                f'https://www.youtube.com/results?search_query={query}',
+                timeout=5000
+            ).text
             try:
                 video_path = re.search(r'\"(\/watch\?v=.*?)\"', results)[1] # type: ignore
                 await self.bot.send(ctx, f'https://youtube.com{video_path}')

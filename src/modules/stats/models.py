@@ -14,6 +14,10 @@ class Message(database.Entity): # type: ignore
     server_id = orm.Required(str)
 
     def __repr__(self) -> str:
-        return f"<Message (id='{self.id}', content='{self.content[:20]}...', datetime='{self.datetime}', user_id='{self.user_id}', channel_id='{self.channel_id}', server_id='{self.server_id}')>"
+        return (
+            f"<Message (id='{self.id}', content='{self.content[:20]}...', " +
+            f"datetime='{self.datetime}', user_id='{self.user_id}', " +
+            f"channel_id='{self.channel_id}', server_id='{self.server_id}')>"
+        )
 
 database.generate_mapping(create_tables=True)

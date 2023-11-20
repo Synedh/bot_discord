@@ -33,7 +33,10 @@ class StatsCommands(commands.Cog, name=MODULE_NAME):
         elif channel and not user:
             embed = channel_stats(ctx.message.guild, channel)
         else:
-            return await self.bot.send_error(ctx, 'You cannot specify both a **user** and a **channel** at the same time.')
+            return await self.bot.send_error(
+                ctx,
+                'You cannot specify both a **user** and a **channel** at the same time.'
+            )
         await self.bot.send(ctx, embed=embed)
 
 
@@ -53,21 +56,25 @@ def add_entry(message: Message) -> None:
 @orm.db_session # type: ignore
 def week_stats(server: discord.Guild) -> discord.Embed:
     last_week = datetime.now() - timedelta(days=7)
-    user_stats: dict[str, int] = {}
-    channel_stats: dict[str, int] = {}
+    usr_stats: dict[str, int] = {}
+    chan_stats: dict[str, int] = {}
 
-    query = Message.select(lambda m: m.server_id == server.id and m.datetime >= last_week and m.channel_id not in ['433665712247144463', '916071520554614785'])
+    query = Message.select(lambda m: (
+        m.server_id == server.id and
+        m.datetime >= last_week and
+        m.channel_id not in ['433665712247144463', '916071520554614785']
+    ))
     for message in query:
-        user_stats[message.user_id] = user_stats.get(message.user_id, 0) + 1
-        channel_stats[message.channel_id] = channel_stats.get(message.channel_id, 0) + 1
-    ordered_user_stats = sorted(user_stats.items(), key=lambda v: v[1], reverse=True)
-    ordered_channel_stats = sorted(channel_stats.items(), key=lambda v: v[1], reverse=True)
-    user_detail = '\n'.join(['- <@%s> : %d' % stats for stats in ordered_user_stats[:10]])
-    channel_detail = '\n'.join(['- <#%s> : %d' % stats for stats in ordered_channel_stats[:5]])
+        usr_stats[message.user_id] = usr_stats.get(message.user_id, 0) + 1
+        chan_stats[message.channel_id] = chan_stats.get(message.channel_id, 0) + 1
+    ordered_usr_stats = sorted(usr_stats.items(), key=lambda v: v[1], reverse=True)
+    ordered_channel_stats = sorted(chan_stats.items(), key=lambda v: v[1], reverse=True)
+    user_detail = '\n'.join([f'- <@{id}> : {qty}' for id, qty in ordered_usr_stats[:10]])
+    channel_detail = '\n'.join([f'- <#{id}> : {qty}' for id, qty in ordered_channel_stats[:5]])
 
     embed = discord.Embed(
         title="Messages envoyés les 7 derniers jours",
-        description=f'{sum(user_stats.values())} messages envoyés.',
+        description=f'{sum(usr_stats.values())} messages envoyés.',
         color=discord.Color.blue()
     )
     if server.icon:
@@ -80,23 +87,27 @@ def week_stats(server: discord.Guild) -> discord.Embed:
 @orm.db_session # type: ignore
 def user_stats(server: discord.Guild, user: discord.Member) -> discord.Embed:
     date_stats: dict[str, int] = {}
-    channel_stats: dict[str, int] = {}
+    chan_stats: dict[str, int] = {}
 
-    query = Message.select(lambda m: m.server_id == server.id and m.user_id == user.id and m.channel_id != '433665712247144463')
+    query = Message.select(lambda message: (
+        message.server_id == server.id and
+        message.user_id == user.id and
+        message.channel_id != '433665712247144463'
+    ))
     for message in query:
         if message.datetime > datetime.now() - timedelta(days=7):
-            channel_stats[message.channel_id] = channel_stats.get(message.channel_id, 0) + 1
+            chan_stats[message.channel_id] = chan_stats.get(message.channel_id, 0) + 1
         date = message.datetime.strftime('%W-%Y')
         date_stats[date] = date_stats.get(date, 0) + 1
 
-    ordered_channel_stats = sorted(channel_stats.items(), key=lambda v: v[1], reverse=True)[:5]
-    ordered_date_stats = [(stats[0].split('-')[0], stats[1]) for stats in list(date_stats.items())[:-6:-1]]
-    channel_detail = '\n'.join(['- <#%s> : %d' % stats for stats in ordered_channel_stats])
-    date_detail = '\n'.join([' - Semaine %s : %d' % stats for stats in ordered_date_stats])
+    ordered_chan_stats = sorted(chan_stats.items(), key=lambda v: v[1], reverse=True)[:5]
+    ordered_date_stats = [(date.split('-')[0], qty) for date, qty in list(date_stats.items())[:-6:-1]]
+    channel_detail = '\n'.join([f'- <#{id}> : {qty}' for id, qty in ordered_chan_stats])
+    date_detail = '\n'.join([f' - Semaine {id} : {qty}' for id, qty in ordered_date_stats])
 
     embed = discord.Embed(
         title=f'Historique de @{user.display_name} sur les 7 derniers jours',
-        description=f'{sum(channel_stats.values())} messages envoyés.',
+        description=f'{sum(chan_stats.values())} messages envoyés.',
         color=discord.Color.blue()
     )
     if user.avatar:
@@ -107,25 +118,28 @@ def user_stats(server: discord.Guild, user: discord.Member) -> discord.Embed:
 
 
 @orm.db_session # type: ignore
-def channel_stats(server: discord.Guild, channel: discord.TextChannel | discord.VoiceChannel | discord.ForumChannel) -> discord.Embed:
+def channel_stats(
+    server: discord.Guild,
+    channel: discord.TextChannel | discord.VoiceChannel | discord.ForumChannel
+) -> discord.Embed:
     date_stats: dict[str, int] = {}
-    user_stats: dict[str, int] = {}
+    usr_stats: dict[str, int] = {}
 
     query = Message.select(lambda m: m.server_id == server.id and m.channel_id == channel.id)
     for message in query:
         if message.datetime > datetime.now() - timedelta(days=7):
-            user_stats[message.user_id] = user_stats.get(message.user_id, 0) + 1
+            usr_stats[message.user_id] = usr_stats.get(message.user_id, 0) + 1
         date = message.datetime.strftime('%W-%Y')
         date_stats[date] = date_stats.get(date, 0) + 1
 
-    ordered_user_stats = sorted(user_stats.items(), key=lambda v: v[1], reverse=True)[:10]
-    ordered_date_stats = [(stats[0].split('-')[0], stats[1]) for stats in list(date_stats.items())[:-6:-1]]
-    user_detail = '\n'.join(['- <@%s> : %d' % stats for stats in ordered_user_stats])
-    date_detail = '\n'.join([' - Semaine %s : %d' % stats for stats in ordered_date_stats])
+    ordered_usr_stats = sorted(usr_stats.items(), key=lambda v: v[1], reverse=True)[:10]
+    ordered_date_stats = [(date.split('-')[0], qty) for date, qty in list(date_stats.items())[:-6:-1]]
+    user_detail = '\n'.join([f'- <@{id}> : {qty}' for id, qty in ordered_usr_stats])
+    date_detail = '\n'.join([f' - Semaine {id} : {qty}' for id, qty in ordered_date_stats])
 
     embed = discord.Embed(
         title=f'Historique de #{channel.name} sur les 7 derniers jours',
-        description=f'{sum(user_stats.values())} messages envoyés.',
+        description=f'{sum(usr_stats.values())} messages envoyés.',
         color=discord.Color.blue()
     )
     if server.icon:
