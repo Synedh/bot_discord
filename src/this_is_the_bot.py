@@ -4,6 +4,8 @@ from typing import Any
 import discord
 from discord.ext import commands
 
+from src.modules.stats import stats
+
 
 class ThisIsTheBot(commands.Bot):
     def __init__(self, modules: list[str], *args: Any, **kwargs: Any) -> None:
@@ -31,6 +33,7 @@ class ThisIsTheBot(commands.Bot):
     async def on_message(self, message: discord.Message) -> None:
         if not message.author.bot:
             self._log_message(message)
+            stats.add_entry(message)
 
     @commands.Cog.listener()
     async def on_interaction(self, interaction: discord.Interaction['ThisIsTheBot']) -> None:
