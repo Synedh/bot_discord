@@ -83,8 +83,8 @@ class BirthdaysCommands(commands.Cog, name=MODULE_NAME):
             birthdate = datetime.strptime(birthday, '%d-%m-%Y')
             if (datetime.now() - birthdate).days < 365.25 * 15:
                 raise ParameterError('Incorrect date, too young to be here !')
-        except ValueError:
-            raise ParameterError('Incorrect date format, please use DD-MM-YYYY format')
+        except ValueError as error:
+            raise ParameterError('Incorrect date format, please use DD-MM-YYYY format') from error
 
         with orm.db_session:
             query = Birthday.select(lambda birthdate: birthdate.user_id == user.id)

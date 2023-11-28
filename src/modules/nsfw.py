@@ -35,11 +35,14 @@ class NsfwCommands(commands.Cog, name=MODULE_NAME):
         embed = self._build_embed('butts')
         await self.bot.send(ctx, embed=embed)
 
-    def _build_embed(self, type: Literal['boobs'] | Literal['butts']) -> discord.Embed:
-        result: ApiImage = requests.get(f'http://api.o{type}.ru/{type}/0/1/random').json()[0]
+    def _build_embed(self, api_type: Literal['boobs'] | Literal['butts']) -> discord.Embed:
+        result: ApiImage = requests.get(
+            f'http://api.o{api_type}.ru/{api_type}/0/1/random',
+            timeout=5000
+        ).json()[0]
         return (
-            discord.Embed(url=f'https://o{type}.ru/b/{result["id"]}/')
-                   .set_image(url=f'https://media.o{type}.ru/{result["preview"]}')
+            discord.Embed(url=f'https://o{api_type}.ru/b/{result["id"]}/')
+                   .set_image(url=f'https://media.o{api_type}.ru/{result["preview"]}')
                    .set_footer(text=f'#{result["id"]} • Rank: {result["rank"]}')
         )
 

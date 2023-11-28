@@ -44,7 +44,7 @@ class ThisIsTheBot(commands.Bot):
         await self.send(ctx, content, title=title, color=discord.Color.red(), ephemeral=True)
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message) -> None:
+    async def on_message(self, message: discord.Message, /) -> None:
         if not message.author.bot:
             _log_message(message)
             stats.add_entry(message)
@@ -59,7 +59,8 @@ class ThisIsTheBot(commands.Bot):
     async def on_command_error(
         self,
         ctx: commands.Context['ThisIsTheBot'], # type: ignore
-        error: commands.CommandError
+        error: commands.CommandError,
+        /
     ) -> None:
         if (
             error.__cause__ and
