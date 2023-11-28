@@ -6,7 +6,6 @@ from discord.ext import commands
 
 from src.modules.stats import stats
 
-
 class ThisIsTheBot(commands.Bot):
     def __init__(self, modules: list[str], *args: Any, **kwargs: Any) -> None:
         self.modules = modules
@@ -21,9 +20,17 @@ class ThisIsTheBot(commands.Bot):
         self,
         ctx: commands.Context['ThisIsTheBot'],
         content: str | None = None,
+        *,
+        title: str | None = None,
+        color: int | discord.Color = discord.Color.blue(),
         **kwargs: Any
     ) -> None:
-        await ctx.send(content, **kwargs)
+        embed = kwargs.get('embed', discord.Embed(
+            title=title,
+            description=content,
+            color=color
+        ))
+        await ctx.send(**{**kwargs, 'embed': embed})
         self._log_output(ctx, content, **kwargs)
 
     async def send_error(
@@ -31,15 +38,9 @@ class ThisIsTheBot(commands.Bot):
         ctx: commands.Context['ThisIsTheBot'],
         content: str,
         *,
-        title: str = 'Error',
-        **kwargs: Any
+        title: str = 'Error'
     ) -> None:
-        embed = discord.Embed(
-            title=title,
-            description=content,
-            color=discord.Color.red()
-        )
-        await ctx.send(embed=embed, ephemeral=True, **kwargs)
+        await self.send(ctx, content, title=title, color=discord.Color.red())
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message, /) -> None:

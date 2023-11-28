@@ -15,9 +15,9 @@ class DefaultCommands(commands.Cog, name=MODULE_NAME):
         self.bot = bot
 
     @commands.hybrid_command() #type: ignore
-    async def hello(self, ctx: commands.Context[ThisIsTheBot]) -> None:
-        '''Send a friendly hello message'''
-        await self.bot.send(ctx, f'Hello {ctx.message.author.mention} !')
+    async def ping(self, ctx: commands.Context[ThisIsTheBot]) -> None:
+        '''Send a ping message'''
+        await self.bot.send(ctx, f'Pong ! {int(ctx.bot.latency * 1000)}ms')
 
     @commands.hybrid_command() # type: ignore
     async def pick(self, ctx: commands.Context[ThisIsTheBot], choices: str) -> None:

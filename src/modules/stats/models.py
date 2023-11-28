@@ -19,5 +19,3 @@ class Message(database.Entity): # type: ignore
             f"datetime='{self.datetime}', user_id='{self.user_id}', " +
             f"channel_id='{self.channel_id}', server_id='{self.server_id}')>"
         )
-
-database.generate_mapping(create_tables=True)
