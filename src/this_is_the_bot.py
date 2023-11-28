@@ -75,6 +75,11 @@ class ThisIsTheBot(commands.Bot):
         await self.send_error(ctx, f'Exception occured in command :\n{error}')
         await super().on_command_error(ctx, error)
 
+    @commands.Cog.listener()
+    async def on_thread_create(self, thread: discord.Thread) -> None:
+        await thread.join()
+
+
 def _log_message(message: discord.Message) -> None:
     logging.info(
         '--- %s;%s;%s;%s',

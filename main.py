@@ -21,6 +21,6 @@ bot = ThisIsTheBot(
 @bot.event
 async def on_ready() -> None:
     logging.info('Logged in as %s.', bot.user)
-    database.generate_mapping(create_tables=True)
+    database.generate_mapping()
 
 bot.run(TOKEN)
