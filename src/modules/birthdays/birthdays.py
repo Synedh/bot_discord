@@ -6,6 +6,7 @@ import discord
 from discord.ext import commands
 from pony import orm
 
+from src.errors import ForbiddenOperation, GuildOperation, ParameterError
 from .models import Birthday
 
 if typing.TYPE_CHECKING:
@@ -26,7 +27,7 @@ class BirthdaysCommands(commands.Cog, name=MODULE_NAME):
     async def list(self, ctx: commands.Context['ThisIsTheBot']) -> None:
         """Display registered birthdays"""
         if not ctx.guild:
-            return await self.bot.send_error(ctx, 'Cannot use this command out for a server.')
+            raise GuildOperation()
         now = datetime.now().date()
         birthdays = []
         with orm.db_session:
@@ -73,17 +74,17 @@ class BirthdaysCommands(commands.Cog, name=MODULE_NAME):
     ) -> None:
         """Add birthday for current or given user"""
         if not ctx.guild:
-            return await self.bot.send_error(ctx, 'Cannot use this command out for a server.')
+            raise GuildOperation()
         if ctx.author not in (user, ctx.guild.owner):
-            return await self.bot.send_error(ctx, 'Forbidden operation.')
+            raise ForbiddenOperation()
         if not user:
             user = ctx.author
         try:
             birthdate = datetime.strptime(birthday, '%d-%m-%Y')
             if (datetime.now() - birthdate).days < 365.25 * 15:
-                return await self.bot.send_error(ctx, 'Incorrect date, too young to be here !')
+                raise ParameterError('Incorrect date, too young to be here !')
         except ValueError:
-            return await self.bot.send_error(ctx, 'Incorrect date format, please use DD-MM-YYYY format')
+            raise ParameterError('Incorrect date format, please use DD-MM-YYYY format')
 
         with orm.db_session:
             query = Birthday.select(lambda birthdate: birthdate.user_id == user.id)
@@ -108,9 +109,9 @@ class BirthdaysCommands(commands.Cog, name=MODULE_NAME):
     ) -> None:
         """Remove birthday for current or given user"""
         if not ctx.guild:
-            return await self.bot.send_error(ctx, 'Cannot use this command out for a server.')
+            raise GuildOperation()
         if ctx.author not in (user, ctx.guild.owner):
-            return await self.bot.send_error(ctx, 'Forbidden operation.')
+            raise ForbiddenOperation()
         if not user:
             user = ctx.author
 
