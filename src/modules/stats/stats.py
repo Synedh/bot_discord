@@ -18,25 +18,42 @@ class StatsCommands(commands.Cog, name=MODULE_NAME):
     def __init__(self, bot: 'ThisIsTheBot'):
         self.bot = bot
 
-    @commands.hybrid_command() # type: ignore
-    async def stats(
+    @commands.hybrid_group() # type: ignore
+    async def stats(self, _: commands.Context['ThisIsTheBot']) -> None:
+        """Stats commands"""
+
+    @stats.command() # type: ignore
+    async def week(self, ctx: commands.Context['ThisIsTheBot']) -> None:
+        """Weekly stats"""
+        embed = from_date_stats(ctx.message.guild, datetime.now() - timedelta(days=7))
+        await self.bot.send(ctx, embed=embed)
+
+    @stats.command() # type: ignore
+    async def month(self, ctx: commands.Context['ThisIsTheBot']) -> None:
+        """Monthly stats"""
+        embed = from_date_stats(ctx.message.guild, datetime.now() - timedelta(days=31))
+        await self.bot.send(ctx, embed=embed)
+
+    @stats.command() # type: ignore
+    async def year(self, ctx: commands.Context['ThisIsTheBot']) -> None:
+        """Yearly stats"""
+        embed = from_date_stats(ctx.message.guild, datetime.now() - timedelta(days=365))
+        await self.bot.send(ctx, embed=embed)
+
+    @stats.command() # type: ignore
+    async def user(self, ctx: commands.Context['ThisIsTheBot'], user: discord.Member) -> None:
+        """User weekly stats"""
+        embed = user_stats(ctx.message.guild, user)
+        await self.bot.send(ctx, embed=embed)
+
+    @stats.command() # type: ignore
+    async def channel(
         self,
         ctx: commands.Context['ThisIsTheBot'],
-        user: discord.Member | None = None,
-        channel: discord.TextChannel | discord.VoiceChannel | discord.Thread | None=None
+        channel: discord.TextChannel | discord.VoiceChannel | discord.Thread
     ) -> None:
-        """Get stats of given server. Use @user or #channel for details."""
-        if not (user or channel):
-            embed = week_stats(ctx.message.guild)
-        elif user and not channel:
-            embed = user_stats(ctx.message.guild, user)
-        elif channel and not user:
-            embed = channel_stats(ctx.message.guild, channel)
-        else:
-            return await self.bot.send_error(
-                ctx,
-                'You cannot specify both a **user** and a **channel** at the same time.'
-            )
+        """Channel weekly stats"""
+        embed = channel_stats(ctx.message.guild, channel)
         await self.bot.send(ctx, embed=embed)
 
 
@@ -54,14 +71,13 @@ def add_entry(message: Message) -> None:
 
 
 @orm.db_session # type: ignore
-def week_stats(server: discord.Guild) -> discord.Embed:
-    last_week = datetime.now() - timedelta(days=7)
+def from_date_stats(server: discord.Guild, date: datetime) -> discord.Embed:
     usr_stats: dict[str, int] = {}
     chan_stats: dict[str, int] = {}
 
     query = Message.select(lambda m: (
         m.server_id == server.id and
-        m.datetime >= last_week and
+        m.datetime >= date and
         m.channel_id not in ['433665712247144463', '916071520554614785']
     ))
     for message in query:
@@ -71,9 +87,10 @@ def week_stats(server: discord.Guild) -> discord.Embed:
     ordered_channel_stats = sorted(chan_stats.items(), key=lambda v: v[1], reverse=True)
     user_detail = '\n'.join([f'- <@{id}> : {qty}' for id, qty in ordered_usr_stats[:10]])
     channel_detail = '\n'.join([f'- <#{id}> : {qty}' for id, qty in ordered_channel_stats[:5]])
+    days = (datetime.now() - date).days
 
     embed = discord.Embed(
-        title="Messages envoyés les 7 derniers jours",
+        title=f"Messages envoyés les {days} derniers jours",
         description=f'{sum(usr_stats.values())} messages envoyés.',
         color=discord.Color.blue()
     )
