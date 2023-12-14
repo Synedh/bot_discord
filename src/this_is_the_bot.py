@@ -8,8 +8,17 @@ from src.errors import ForbiddenOperation, GuildOperation, ParameterError
 from src.modules.stats import stats
 
 class ThisIsTheBot(commands.Bot):
-    def __init__(self, modules: list[str], *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        modules: list[str],
+        default_server: str,
+        default_channel: str,
+        *args: Any,
+        **kwargs: Any
+    ) -> None:
         self.modules = modules
+        self.default_server = default_server
+        self.default_channel = default_channel
         super().__init__(*args, **kwargs)
 
     async def setup_hook(self) -> None:
@@ -19,20 +28,30 @@ class ThisIsTheBot(commands.Bot):
 
     async def send(
         self,
-        ctx: commands.Context['ThisIsTheBot'],
+        ctx: commands.Context['ThisIsTheBot'] | None = None,
         content: str | None = None,
         *,
         title: str | None = None,
         color: int | discord.Color = discord.Color.blue(),
         **kwargs: Any
     ) -> None:
+        """
+        Default function to send any message.
+        Bot messages are sent as embed.
+        Send a message to the default channel if ctx is null.
+        """
         embed = kwargs.get('embed', discord.Embed(
             title=title,
             description=content,
             color=color
         ))
-        await ctx.send(**{**kwargs, 'embed': embed})
-        _log_output(ctx, content, **kwargs)
+        if ctx:
+            await ctx.send(**{**kwargs, 'embed': embed})
+            _log_output(ctx, content, **kwargs)
+        else:
+            channel = self.get_channel(self.default_channel)
+            await channel.send(embed=embed)
+            _log_output(content, guild_id=channel.guild.id, channel_id=channel.id, **kwargs)
 
     async def send_error(
         self,
@@ -41,6 +60,10 @@ class ThisIsTheBot(commands.Bot):
         *,
         title: str = 'Error'
     ) -> None:
+        """
+        Default function to send error message.
+        As much as possible, use bot errors from src.errors to handle exceptions.
+        """
         await self.send(ctx, content, title=title, color=discord.Color.red(), ephemeral=True)
 
     @commands.Cog.listener()
@@ -99,15 +122,22 @@ def _log_input(interaction: discord.Interaction['ThisIsTheBot']) -> None:
     )
 
 def _log_output(
-    ctx: commands.Context['ThisIsTheBot'],
+    ctx: commands.Context['ThisIsTheBot'] | None = None,
     content: str | None = None,
-    embed: discord.Embed | None = None
+    *,
+    embed: discord.Embed | None = None,
+    guild_id: int | None = None,
+    channel_id: int | None = None,
+    author_id: int | None = None
 ) -> None:
+    guild_id = guild_id if guild_id else ctx.guild.id if ctx and ctx.guild else ''
+    channel_id = channel_id if channel_id else ctx.channel.id if ctx and ctx.channel else ''
+    author_id = author_id if author_id else ctx.author.id if ctx and ctx.author else ''
     logging.info(
         '>>> %s;%s;%s;%s;%s',
-        ctx.guild.id if ctx.guild else '',
-        ctx.channel.id if ctx.channel else '',
-        ctx.author.id if ctx.author else '',
+        guild_id,
+        channel_id,
+        author_id,
         content if content else '',
         embed.title if embed else ''
     )

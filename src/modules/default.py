@@ -10,7 +10,7 @@ from src.this_is_the_bot import ThisIsTheBot
 MODULE_NAME = "Default"
 
 
-class DefaultCommands(commands.Cog, name=MODULE_NAME):
+class Commands(commands.Cog, name=MODULE_NAME):
     def __init__(self, bot: ThisIsTheBot):
         self.bot = bot
 
@@ -88,5 +88,5 @@ class DefaultCommands(commands.Cog, name=MODULE_NAME):
     #             await message.add_reaction(emotes[i])
 
 async def setup(bot: ThisIsTheBot) -> None:
-    await bot.add_cog(DefaultCommands(bot))
+    await bot.add_cog(Commands(bot))
     logging.info('Loaded module %s.', MODULE_NAME)

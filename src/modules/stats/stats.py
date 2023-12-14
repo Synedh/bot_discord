@@ -1,9 +1,10 @@
 import logging
 import typing
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time, timezone
 
 import discord
-from discord.ext import commands
+import pytz
+from discord.ext import commands, tasks
 from pony import orm
 
 from .models import Message
@@ -13,10 +14,17 @@ if typing.TYPE_CHECKING:
 
 MODULE_NAME = "Stats"
 
+tz = timezone(pytz.timezone('Europe/Paris').utcoffset(datetime.now()))
+DAILY_SHOUT_TIME = time(hour=9, minute=0, tzinfo=tz)
 
-class StatsCommands(commands.Cog, name=MODULE_NAME):
+
+class Commands(commands.Cog, name=MODULE_NAME):
     def __init__(self, bot: 'ThisIsTheBot'):
         self.bot = bot
+        self.shout_weekly_stats.start()
+
+    def cog_unload(self):
+        self.shout_weekly_stats.cancel()
 
     @commands.hybrid_group() # type: ignore
     async def stats(self, _: commands.Context['ThisIsTheBot']) -> None:
@@ -55,6 +63,15 @@ class StatsCommands(commands.Cog, name=MODULE_NAME):
         """Channel weekly stats"""
         embed = channel_stats(ctx.message.guild, channel)
         await self.bot.send(ctx, embed=embed)
+
+    @tasks.loop(time=DAILY_SHOUT_TIME)
+    async def shout_weekly_stats(self):
+        if datetime.now().weekday() != 0:
+            return
+        await self.bot.wait_until_ready()
+        server = self.bot.get_guild(self.bot.default_server)
+        embed = from_date_stats(server, datetime.now() - timedelta(days=7))
+        await self.bot.send(embed=embed)
 
 
 @orm.db_session # type: ignore
@@ -167,5 +184,5 @@ def channel_stats(
 
 
 async def setup(bot: 'ThisIsTheBot') -> None:
-    await bot.add_cog(StatsCommands(bot))
+    await bot.add_cog(Commands(bot))
     logging.info('Loaded module %s.', MODULE_NAME)

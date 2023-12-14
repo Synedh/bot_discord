@@ -17,7 +17,7 @@ class ApiImage(TypedDict):
     rank: int
     author: str | None
 
-class NsfwCommands(commands.Cog, name=MODULE_NAME):
+class Commands(commands.Cog, name=MODULE_NAME):
     def __init__(self, bot: ThisIsTheBot):
         self.bot = bot
 
@@ -48,5 +48,5 @@ class NsfwCommands(commands.Cog, name=MODULE_NAME):
 
 
 async def setup(bot: ThisIsTheBot) -> None:
-    await bot.add_cog(NsfwCommands(bot))
+    await bot.add_cog(Commands(bot))
     logging.info('Loaded module %s.', MODULE_NAME)

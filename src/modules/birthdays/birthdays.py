@@ -1,9 +1,10 @@
 import logging
 import typing
-from datetime import date, datetime
+from datetime import date, datetime, time, timezone
 
 import discord
-from discord.ext import commands
+import pytz
+from discord.ext import commands, tasks
 from pony import orm
 
 from src.errors import ForbiddenOperation, GuildOperation, ParameterError
@@ -14,10 +15,17 @@ if typing.TYPE_CHECKING:
 
 MODULE_NAME = "Birthdays"
 
+tz = timezone(pytz.timezone('Europe/Paris').utcoffset(datetime.now()))
+DAILY_SHOUT_TIME = time(hour=0, minute=0, tzinfo=tz)
 
-class BirthdaysCommands(commands.Cog, name=MODULE_NAME):
+
+class Commands(commands.Cog, name=MODULE_NAME):
     def __init__(self, bot: 'ThisIsTheBot'):
         self.bot = bot
+        self.daily_shout.start()
+
+    def cog_unload(self):
+        self.daily_shout.cancel()
 
     @commands.hybrid_group() # type: ignore
     async def birthday(self, _: commands.Context['ThisIsTheBot']) -> None:
@@ -121,10 +129,10 @@ class BirthdaysCommands(commands.Cog, name=MODULE_NAME):
 
         await self.bot.send(ctx, f'Birthdate has been removed for {user.mention}.')
 
-
-    @birthday.command() # type: ignore
-    async def shout(self, ctx: commands.Context['ThisIsTheBot']) -> None:
+    @tasks.loop(time=DAILY_SHOUT_TIME)
+    async def daily_shout(self) -> None:
         """Shout birthdays for current date"""
+        await self.bot.wait_until_ready()
         now = datetime.now()
 
         with orm.db_session:
@@ -133,20 +141,20 @@ class BirthdaysCommands(commands.Cog, name=MODULE_NAME):
                 birthday.birth_date.month == now.month
             ))
             if query.count() == 0:
-                await self.bot.send(ctx, 'Pas d\'anniversaire aujourd\'hui :\'(')
-
-            birthdays = [f'<@{birthday.user_id}> ({now.year - birthday.birth_date.year} ans)' for birthday in query]
-            for birthday in query:
-                birthday.last_birthday = now.year
-            orm.commit()
+                return
+            birthdays = [
+                f'<@{birthday.user_id}> ({now.year - birthday.birth_date.year} ans)'
+                for birthday in query
+            ]
 
         text = 'Aujourd\'hui, c\'est l\'anniversaire de '
         if len(birthdays) > 1:
             text += f'{", ".join(birthdays[:-1])} et {birthdays[-1]}'
         else:
             text += birthdays[0]
-        await self.bot.send(ctx, text + ' !\n\nFêtez ça comme il se doit ! :partying_face:')
+        await self.bot.send(content=text + ' !\n\nFêtez ça comme il se doit ! :partying_face:')
+
 
 async def setup(bot: 'ThisIsTheBot') -> None:
-    await bot.add_cog(BirthdaysCommands(bot))
+    await bot.add_cog(Commands(bot))
     logging.info('Loaded module %s.', MODULE_NAME)
