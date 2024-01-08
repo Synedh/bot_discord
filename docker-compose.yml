@@ -1,0 +1,10 @@
+services:
+  main:
+    container_name: BotDiscord
+    build: .
+    command: python main.py
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - .env
+    restart: unless-stopped

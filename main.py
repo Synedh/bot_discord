@@ -1,56 +1,35 @@
-import pathlib
-import configparser
+#!/usr/bin/env python
+
+import logging
 
 import discord
 from discord.ext import commands
-from pony.thirdparty.compiler.ast import Bitand
 
-from src import stats
-from src import birthday
-from src import commands as com
-from src import nsfw
-from src.logger import pprint, log_in, logged_send
-from src.custom_bot import CustomBot
+from src.settings import (PROD, DEFAULT_CHANNEL, DEFAULT_SERVER, PREFIX, TOKEN,
+                          database, modules)
+from src.this_is_the_bot import ThisIsTheBot
 
-ROOT_PATH = pathlib.Path(__file__).parent.absolute()
-config = configparser.ConfigParser()
-config.read(ROOT_PATH / 'config.ini')
-bot = CustomBot(
-    command_prefix=commands.when_mentioned_or('!'),
-    intents=discord.Intents(members=True, messages=True, guilds=True),
+bot = ThisIsTheBot(
+    modules=modules,
+    default_channel=DEFAULT_CHANNEL,
+    default_server=DEFAULT_SERVER,
+    command_prefix=commands.when_mentioned_or(PREFIX),
+    intents=discord.Intents.all(),
     pm_help=True,
-    default_channel=int(config['discord']['DEFAULT_CHANNEL']),
-    default_server=int(config['discord']['DEFAULT_SERVER']))
-TOKEN = config['discord']['TOKEN']
-
+)
 
 @bot.event
-async def on_message(message):
-    if not message.author.bot:
-        stats.add_entry(message)
-        if (message.content.startswith('!') and message.content[1:] != ''
-            or message.content.startswith(f'<@!{bot.user.id}>') and message.content[len(f'<@!{bot.user.id}>'):] != ''):
-            log_in(message)
-        await bot.process_commands(message)
+async def on_ready() -> None:
+    logging.info('Logged in as %s.', bot.user)
+    database.generate_mapping(create_tables=not PROD)
 
-
-@bot.event
-async def on_command_error(ctx, error):
-    await logged_send(ctx, error)
+if __name__ == '__main__':
     try:
-        raise error
-    except commands.errors.CommandNotFound:
-        pass
-
-
-@bot.event
-async def on_ready():
-    pprint(f'Logged in as {bot.user}.')
-    pprint('---------')
-
-
-bot.add_cog(com.DefaultCommands(bot))
-bot.add_cog(nsfw.NSFWCommands(bot))
-bot.add_cog(stats.StatsCommands(bot))
-bot.add_cog(birthday.BirthdayCommands(bot))
-bot.run(TOKEN)
+        bot.run(TOKEN)
+    except Exception as error:
+        logging.critical(
+            'Exception occured while running bot:',
+            exc_info=(type(error), error, error.__traceback__)
+        )
+    finally:
+        logging.info('Shutdown.')

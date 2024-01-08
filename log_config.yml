@@ -1,0 +1,25 @@
+version: 1
+formatters:
+  default:
+    format: '[%(asctime)s][%(levelname)s][%(module)s] %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: default
+    stream: ext://sys.stdout
+  log_file:
+    class: logging.handlers.TimedRotatingFileHandler
+    when: W0
+    backupCount: 4
+    filename: log/main.log
+    level: INFO
+    formatter: default
+loggers:
+  prod:
+    level: INFO
+    handlers: [log_file]
+    propagate: yes
+root:
+  level: DEBUG
+  handlers: [console, log_file]
