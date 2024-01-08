@@ -1,4 +1,3 @@
-import json
 import logging
 import logging.config
 import os
@@ -7,6 +6,7 @@ from pathlib import Path
 import discord
 import dotenv
 from pony import orm
+import yaml
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 dotenv.load_dotenv(BASE_DIR / '.env')
@@ -23,8 +23,8 @@ PREFIX = str(os.getenv('PREFIX'))
 DEFAULT_CHANNEL = int(str(os.getenv('DEFAULT_CHANNEL')))
 DEFAULT_SERVER = int(str(os.getenv('DEFAULT_SERVER')))
 
-with open(BASE_DIR / 'log_config.json', encoding='utf-8') as logconfig:
-    logging.config.dictConfig(json.load(logconfig))
+with open(BASE_DIR / 'log_config.yml', encoding='utf-8') as logconfig:
+    logging.config.dictConfig(yaml.safe_load(logconfig))
 
 discord.utils.setup_logging(root=False)
 

@@ -23,4 +23,13 @@ async def on_ready() -> None:
     logging.info('Logged in as %s.', bot.user)
     database.generate_mapping(create_tables=not PROD)
 
-bot.run(TOKEN)
+if __name__ == '__main__':
+    try:
+        bot.run(TOKEN)
+    except Exception as error:
+        logging.critical(
+            'Exception occured while running bot:',
+            exc_info=(type(error), error, error.__traceback__)
+        )
+    finally:
+        logging.info('Shutdown.')

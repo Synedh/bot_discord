@@ -19,6 +19,8 @@ pony-stubs==0.5.2
 pylint==3.0.2
 pylint-websockets==0.1.2
 python-dotenv==1.0.0
+pytz==2023.3.post1
+PyYAML==6.0.1
 requests==2.31.0
 tomlkit==0.12.1
 types-requests==2.31.0.10

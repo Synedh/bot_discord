@@ -91,7 +91,7 @@ class ThisIsTheBot(commands.Bot):
         ):
             return await self.send_error(ctx, str(error.__cause__.__cause__))
         logging.error(
-            'Ignoring exception in command %s:',
+            'Exception occured in command %s:',
             ctx.command,
             exc_info=(type(error), error, error.__traceback__)
         )
