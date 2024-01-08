@@ -1,0 +1,49 @@
+name: Code quality
+
+on: [push]
+
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Python 3.11
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.11
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Analysing the code with pylint
+      run: |
+        python -m pylint --fail-under=10 --rcfile setup.cfg $(git ls-files '*.py') |
+        tee pylint.txt
+    - name: Upload pylint.txt as artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: pylint report
+        path: pylint.txt
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Python 3.11
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.11
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Analysing the code with mypy
+      run: |
+        python -m mypy --config-file setup.cfg  $(git ls-files '*.py') |
+        tee mypy.txt
+    - name: Upload mypy.txt as artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: mypy report
+        path: mypy.txt
