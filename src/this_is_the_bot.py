@@ -31,15 +31,21 @@ class ThisIsTheBot(commands.Bot):
         ctx: commands.Context['ThisIsTheBot'] | None = None,
         content: str | None = None,
         *,
+        embed: bool = True,
         title: str | None = None,
         color: int | discord.Color = discord.Color.blue(),
         **kwargs: Any
     ) -> None:
         """
         Default function to send any message.
-        Bot messages are sent as embed.
+        Bot messages are sent as embed if not specified.
         Send a message to the default channel if ctx is null.
         """
+        if not embed:
+            await ctx.send(content, **kwargs)
+            _log_output(ctx, content, **kwargs)
+            return
+
         embed = kwargs.get('embed', discord.Embed(
             title=title,
             description=content,

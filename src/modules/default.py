@@ -64,7 +64,7 @@ class Commands(commands.Cog, name=MODULE_NAME):
             ).text
             try:
                 video_path = re.search(r'\"(\/watch\?v=.*?)\"', results)[1] # type: ignore
-                await self.bot.send(ctx, f'https://youtube.com{video_path}')
+                await self.bot.send(ctx, f'https://youtube.com{video_path}', embed=False)
             except IndexError:
                 await self.bot.send(ctx, 'No video found.')
         else:
